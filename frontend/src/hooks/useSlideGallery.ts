@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import { whenImageReady } from '../lib/imageCache.ts';
 
 export interface SlideGallery {
@@ -6,7 +7,30 @@ export interface SlideGallery {
   ready: boolean[];
 }
 
-export function useSlideGallery(slides: string[], intervalMs = 2500): SlideGallery {
+interface SlideGalleryOptions {
+  intervalMs?: number;
+  phaseMs?: number;
+  target?: RefObject<HTMLElement | null>;
+}
+
+let pageScrolling = false;
+let scrollTimer = 0;
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'scroll',
+    () => {
+      pageScrolling = true;
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        pageScrolling = false;
+      }, 180);
+    },
+    { passive: true }
+  );
+}
+
+export function useSlideGallery(slides: string[], options: SlideGalleryOptions = {}): SlideGallery {
+  const { intervalMs = 2500, phaseMs = 0, target } = options;
   const [index, setIndex] = useState(0);
   const [ready, setReady] = useState<boolean[]>(() => slides.map(() => false));
   const readyRef = useRef(ready);
@@ -37,7 +61,23 @@ export function useSlideGallery(slides: string[], intervalMs = 2500): SlideGalle
   useEffect(() => {
     if (slides.length <= 1) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = window.setInterval(() => {
+
+    const element = target?.current;
+    let visible = true;
+    let observer: IntersectionObserver | undefined;
+    if (element && typeof IntersectionObserver !== 'undefined') {
+      visible = false;
+      observer = new IntersectionObserver(
+        (entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+        },
+        { rootMargin: '100px' }
+      );
+      observer.observe(element);
+    }
+
+    const advance = () => {
+      if (!visible || pageScrolling) return;
       setIndex((current) => {
         for (let step = 1; step <= slides.length; step++) {
           const candidate = (current + step) % slides.length;
@@ -45,9 +85,19 @@ export function useSlideGallery(slides: string[], intervalMs = 2500): SlideGalle
         }
         return current;
       });
-    }, intervalMs);
-    return () => window.clearInterval(id);
-  }, [slides.length, intervalMs]);
+    };
+
+    let interval = 0;
+    const first = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(advance, intervalMs);
+    }, phaseMs);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(interval);
+      observer?.disconnect();
+    };
+  }, [slides.length, intervalMs, phaseMs, target]);
 
   return { index, ready };
 }

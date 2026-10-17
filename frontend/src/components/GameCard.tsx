@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
+import { useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { Game } from '../services/api.ts';
 import { PLATFORM_PILL } from './platformTheme.ts';
@@ -49,7 +50,13 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
   const slides = (game.thumbnails.length > 0 ? game.thumbnails : [game.thumbnail]).filter(
     Boolean
   );
-  const { index: slideIndex, ready } = useSlideGallery(slides);
+  const rootRef = useRef<HTMLButtonElement>(null);
+  let phase = 0;
+  for (const ch of game.id) phase = (phase * 31 + ch.charCodeAt(0)) % 2400;
+  const { index: slideIndex, ready } = useSlideGallery(slides, {
+    phaseMs: phase,
+    target: rootRef,
+  });
   const hasAnyThumbnail = slides.length > 0;
   const slideReady = hasAnyThumbnail && ready[slideIndex];
   const artStyle: CSSProperties = {
@@ -73,6 +80,7 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     >
       <button
         type="button"
+        ref={rootRef}
         onClick={() => onOpen?.(game)}
         aria-label={`Open ${game.title}`}
         className="card-frame group relative flex h-full min-h-72 w-full flex-col overflow-hidden text-left"
@@ -91,7 +99,7 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
               aria-hidden="true"
             />
           )}

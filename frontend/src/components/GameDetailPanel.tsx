@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AtSign, BarChart3, ChevronDown, Layers, Lock, Trophy, X } from 'lucide-react';
 import { fetchGame } from '../services/api.ts';
@@ -27,6 +27,7 @@ function achievementPct(achievementsCount: number, totalAchievements: number): n
 export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps) {
   const [detail, setDetail] = useState<Game | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(true);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!game) {
@@ -61,7 +62,9 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
   const heroSlides = (
     active ? (active.thumbnails.length > 0 ? active.thumbnails : [active.thumbnail]) : []
   ).filter(Boolean);
-  const { index: heroIndex, ready: heroReady } = useSlideGallery(heroSlides);
+  const { index: heroIndex, ready: heroReady } = useSlideGallery(heroSlides, {
+    target: heroRef,
+  });
   const heroReadyNow = heroSlides.length > 0 && heroReady[heroIndex];
   const platforms = active?.platforms ?? [];
   const byLevel = [...platforms].sort((a, b) => b.level - a.level);
@@ -118,7 +121,7 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
             onClick={(event) => event.stopPropagation()}
             className="absolute inset-y-0 right-0 flex w-full flex-col border-l border-outline bg-surface/95 backdrop-blur-2xl sm:w-[70vw]"
           >
-            <div className="relative h-44 shrink-0 overflow-hidden bg-ink-950 sm:h-56">
+            <div ref={heroRef} className="relative h-44 shrink-0 overflow-hidden bg-ink-950 sm:h-56">
               <AnimatePresence initial={false}>
                 {heroReadyNow && (
                   <motion.div
@@ -130,7 +133,7 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
                     initial={{ x: '100%' }}
                     animate={{ x: 0 }}
                     exit={{ x: '-100%' }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
                     aria-hidden="true"
                   />
                 )}
