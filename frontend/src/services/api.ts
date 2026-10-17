@@ -28,3 +28,23 @@ export async function fetchGames(): Promise<Game[]> {
   }
   return response.json();
 }
+
+export async function fetchPopularGames(): Promise<Game[]> {
+  const response = await fetch(`${API_BASE}/games/popular-games`);
+  if (!response.ok) {
+    throw new Error(`Failed to load popular games (HTTP ${response.status})`);
+  }
+  return response.json();
+}
+
+export async function addGame(slug: string): Promise<Game> {
+  const response = await fetch(`${API_BASE}/games`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to add game (HTTP ${response.status})`);
+  }
+  return response.json();
+}

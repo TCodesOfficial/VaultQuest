@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { Gamepad2, Layers, Trophy } from 'lucide-react';
 import Navbar from './components/Navbar.tsx';
 import GameCardGrid from './components/GameCardGrid.tsx';
+import EmptyLibrary from './components/EmptyLibrary.tsx';
+import PopularGamesModal from './components/PopularGamesModal.tsx';
 import { fetchGames } from './services/api.ts';
 import type { Game } from './services/api.ts';
 
@@ -29,6 +31,7 @@ export default function App() {
   const [games, setGames] = useState<Game[]>([]);
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
   const [theme, setTheme] = useState<Theme>(() =>
     typeof window !== 'undefined' && localStorage.getItem('app-theme') === 'light'
       ? 'light'
@@ -40,25 +43,21 @@ export default function App() {
     localStorage.setItem('app-theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchGames()
-      .then((data) => {
-        if (cancelled) return;
-        setGames(data);
-        setStatus('ready');
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : String(err));
-        setStatus('error');
-      });
-
-    return () => {
-      cancelled = true;
-    };
+  const loadGames = useCallback(async () => {
+    try {
+      const data = await fetchGames();
+      setGames(data);
+      setError(null);
+      setStatus('ready');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+      setStatus('error');
+    }
   }, []);
+
+  useEffect(() => {
+    void loadGames();
+  }, [loadGames]);
 
   const platformCount = new Set(games.flatMap((g) => g.platforms.map((p) => p.platform))).size;
   const achievementTotal = games.reduce(
@@ -173,19 +172,34 @@ export default function App() {
           )}
 
           {status === 'ready' && games.length === 0 && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="py-12 text-center text-on-surface-secondary"
-            >
-              No games linked yet — your popular picks arrive soon.
-            </motion.p>
+            <EmptyLibrary onTrack={() => setShowPicker(true)} />
           )}
 
           {status === 'ready' && games.length > 0 && (
-            <GameCardGrid games={games} onOpenGame={() => {}} />
+            <section>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="mb-4 flex items-center gap-3"
+              >
+                <h2 className="text-xl font-extrabold tracking-tight text-on-surface">
+                  My Games
+                </h2>
+                <span className="rounded-full border border-outline bg-surface-glass px-2.5 py-1 text-[0.64rem] font-bold tracking-widest text-on-surface-muted uppercase backdrop-blur-md">
+                  {games.length} tracked
+                </span>
+              </motion.div>
+              <GameCardGrid games={games} onOpenGame={() => {}} />
+            </section>
           )}
         </main>
+
+        <PopularGamesModal
+          open={showPicker}
+          onClose={() => setShowPicker(false)}
+          onAdded={() => void loadGames()}
+        />
       </div>
     </>
   );

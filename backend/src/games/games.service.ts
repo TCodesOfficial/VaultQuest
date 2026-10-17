@@ -508,7 +508,27 @@ const SEED_GAMES: Game[] = [
 
 @Injectable()
 export class GamesService {
+  private readonly library: Game[] =
+    process.env.SEED_ON_BOOT === 'false' ? [] : [...SEED_GAMES];
+
   findAll(): Game[] {
+    return this.library;
+  }
+
+  findPopular(): Game[] {
     return SEED_GAMES;
+  }
+
+  addGame(slug: string): Game | null {
+    const alreadyTracked = this.library.find((game) => game.slug === slug);
+    if (alreadyTracked) {
+      return alreadyTracked;
+    }
+    const entry = SEED_GAMES.find((game) => game.slug === slug);
+    if (!entry) {
+      return null;
+    }
+    this.library.push(entry);
+    return entry;
   }
 }

@@ -9,7 +9,7 @@ Build mode: learn
 
 ## Slices
 
-- [ ] **1. Bootstrapped dashboard with live game cards**
+- [x] **1. Bootstrapped dashboard with live game cards**
   Becomes usable: Both servers run; opening the app shows the VaultQuest dashboard with a responsive grid of seeded game cards (thumbnail, title, gamertag, level, platform badges). Nothing persists yet.
   Why now: Carries all bootstrapping (NestJS + Vite scaffolds, `/api/v1` wiring, dependencies) inside a slice that already delivers the main screen — no standalone "setup" step. Proves the React → NestJS HTTP path, the first integration risk, and every later slice lands in a working structure.
   PRD ref: `prd.md > The Core Journey` (steps 1, 3), `prd.md > Screens and Layout` (Main Dashboard), `prd.md > Look and Feel`
@@ -19,7 +19,17 @@ Build mode: learn
   Learner check: Open http://localhost:5173 — you should see the dark VaultQuest dashboard with game cards. Does it feel like the launcher aesthetic we planned?
   Commit: `Scaffold full-stack app with game card dashboard`
 
-- [ ] **2. Games and platform progress persist across restarts**
+- [ ] **2. Empty state and popular-games quick-add**
+  Becomes usable: With zero games, a designed banner offers a curated "Popular Games" list to add in one click.
+  Why now: The learner pulled this forward from its original slot — the empty-library arrival experience matters to them and it finishes the dashboard's promised states before the data layer lands. Reordered from slice 6 (see Revisions).
+  PRD ref: `prd.md > Features and Behavior` (2. Game Library Dashboard), `prd.md > States and Boundaries` (First Use / Empty State)
+  Spec ref: `spec.md > Components` (GameCardGrid)
+  Build: Empty-array branch in the dashboard with the alert banner and Popular Games list wired to `POST /api/v1/games`.
+  Verify (mechanical): Remove seed data → empty banner appears; add a popular game → its card appears.
+  Learner check: Start from an empty library and add a game from Popular Games. Is the flow smooth?
+  Commit: `Add empty state and popular-games quick-add`
+
+- [ ] **3. Games and platform progress persist across restarts**
   Becomes usable: The same dashboard data now comes from the database; restarting the backend keeps every game and its per-platform progress intact.
   Why now: Prisma + Neon + NestJS integration is the exact "nightmare" you want to master — proving it second means every later feature builds on a working data layer. This is also where the kernel's data shape (one game, many platforms) lands for real.
   PRD ref: `prd.md > The Core Journey` (step 3), `prd.md > States and Boundaries` (Normal Loaded State)
@@ -29,7 +39,7 @@ Build mode: learn
   Learner check: Restart the backend, reload the page, and confirm your games and platform levels are all still there.
   Commit: `Persist games and platform progress with Prisma`
 
-- [ ] **3. Cross-platform comparison — the kernel moment**
+- [ ] **4. Cross-platform comparison — the kernel moment**
   Becomes usable: Clicking a game card opens the detail modal with hero banner, active platforms, gamertag, and a side-by-side analytics view contrasting levels and achievements per platform (e.g., COD Mobile Level 42 vs PC Level 12).
   Why now: This is the unique kernel from the scope — the unified-identity "oh, that's cool" moment. It comes early so its feel can steer the remaining build (auth, vault, polish).
   PRD ref: `prd.md > The Core Journey` (step 4), `prd.md > Features and Behavior` (3. Game Detail & Cross-Platform Analytics), `prd.md > Screens and Layout` (Game Detail View)
@@ -39,7 +49,7 @@ Build mode: learn
   Learner check: Open Call of Duty from the grid — do the Mobile vs PC levels and achievements show side by side the way you pictured?
   Commit: `Add game detail modal with cross-platform analytics`
 
-- [ ] **4. Session auth, onboarding slides, and guided tour**
+- [ ] **5. Session auth, onboarding slides, and guided tour**
   Becomes usable: A first visit shows the 3-slide onboarding story then the lightweight spotlight tour; the backend issues and verifies sessions (`/api/v1/auth`), and a minimal login establishes that session.
   Why now: The credentials vault (next slice) must sit behind a session per the core journey, and onboarding is the arrival step — worth trying while there is still time to adjust its feel.
   PRD ref: `prd.md > The Core Journey` (steps 1–2), `prd.md > Features and Behavior` (1. Onboarding & Tour)
@@ -49,7 +59,7 @@ Build mode: learn
   Learner check: Reload the app fresh — walk the onboarding and tour, then log in. Does the arrival flow feel polished, or clunky anywhere?
   Commit: `Add session auth with onboarding and guided tour`
 
-- [ ] **5. Credentials vault**
+- [ ] **6. Credentials vault**
   Becomes usable: From a game's detail view, the primary "Check Login Details" button (session required) reveals per-platform username and password with mask/unmask toggle and one-click copy.
   Why now: Completes the core journey's credential-retrieval promise on top of the session guard and detail modal that already exist.
   PRD ref: `prd.md > The Core Journey` (step 5), `prd.md > Features and Behavior` (4. Credentials Vault)
@@ -58,16 +68,6 @@ Build mode: learn
   Verify (mechanical): Endpoint rejects requests without a session and returns rows with one; passwords render masked in the DOM until toggled; copy action puts the value on the clipboard (toast or state change observed).
   Learner check: Reveal credentials for a game — mask, unmask, and copy each work? Does it feel secure-but-effortless like we wanted?
   Commit: `Add session-protected credentials vault`
-
-- [ ] **6. Empty state and popular-games quick-add**
-  Becomes usable: With zero games, a banner offers a curated "Popular Games" list to add in one click.
-  Why now: Finishes the dashboard's promised states in one small visible slice before the riskiest remaining piece (real-time).
-  PRD ref: `prd.md > Features and Behavior` (2. Game Library Dashboard), `prd.md > States and Boundaries` (First Use / Empty State)
-  Spec ref: `spec.md > Components` (GameCardGrid)
-  Build: Empty-array branch in the dashboard with the alert banner and Popular Games list wired to `POST /api/v1/games`.
-  Verify (mechanical): Remove seed data → empty banner appears; add a popular game → its card appears.
-  Learner check: Start from an empty library and add a game from Popular Games. Is the flow smooth?
-  Commit: `Add empty state and popular-games quick-add`
 
 - [ ] **7. Live progress sync over WebSockets**
   Becomes usable: A progress change on the server pushes `game:progress_updated` over Socket.IO, and the open dashboard updates the affected card/detail without a page reload. A demo trigger is included.
@@ -81,7 +81,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 3 (cross-platform comparison running): grid, detail modal, analytics
+- [ ] Early usable behavior explored — after slice 4 (cross-platform comparison running): grid, detail modal, analytics
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -112,3 +112,8 @@ Activity mode:
 - Semantic theme tokens introduced — `@theme inline` maps `primary` / `primary-strong` / `secondary` / `tertiary` / `highlight` / `success` / `surface` / `surface-raised` / `surface-glass` / `on-surface` / `on-surface-secondary` / `on-surface-muted` / `outline` onto CSS variables that flip under `html.light`, so components use role-based utilities instead of hard-coded colors; raw palette retained only for decorative art (scene, cover fallbacks, glare).
 - Game cards now render real per-game cover art from the web: the SVG placeholders under `frontend/public/covers/` were rejected and deleted; the seed's 15 games (up from 4) carry verified hotlinked thumbnail URLs — Steam CDN `library_600x900.jpg` for the 10 Steam titles and RAWG `media.rawg.io` og:image URLs (1280px resize) for Fortnite, Genshin Impact, Minecraft, Valorant, and Roblox (IGDB is Cloudflare-blocked, RAWG chosen instead). Every URL was HEAD-verified (HTTP 200, image/jpeg) before insertion; card art uses `game.thumbnail` with the gradient+initials treatment kept only as fallback.
 - Cover-art visibility bug fixed: a leftover `.game-thumb { position: relative; }` rule in `index.css` was overriding Tailwind's `absolute` on the art layer (unlayered custom CSS beats Tailwind v4's layered utilities), collapsing the art div to zero height — so card art never painted, for the SVG covers or the web URLs. Rule removed; the `::before`/`::after` sheen decorations still position correctly inside the now-correctly-sized absolute parent.
+- Slice plan reordered at the learner's request: the original slice 6 (empty state + popular-games quick-add) moved up to **slice 2**, right after the dashboard; persistence/auth/vault shifted down one slot (2→3, 3→4, 4→5, 5→6), WebSockets stays 7. Reason: the learner wants the first-run arrival experience early in the build.
+- Slice-1 visual iterations after hands-on checks: bottom glass panel removed from cards (art now full-bleed with hover-darken reveal), desktop game name moved to a centered bottom chip with details revealing above it on hover, mobile always shows details (no hover on touch), hero section introduced and compacted (centered, full-width, staggered blur-in), navbar/loading/error states animate in.
+- "My Games" section heading added above the card grid (with a "N tracked" count chip) so the learner's ownership framing is visible in the UI.
+- Full-screen add-games experience: the popular-games picker went from a centered modal to a full-screen searchable catalog (search input with live filtering + clear, responsive tile grid) at the learner's direction.
+- Forward expectation recorded (learner, deferred to later phases): after adding a game, the flow should eventually carry the user into that game's details / platform sign-in — maps onto slice 4 (game detail), slice 5 (auth/login), slice 6 (credentials vault); consider connecting the picker's "Added" state to opening the game's detail view when those land.
