@@ -1,0 +1,61 @@
+// prisma/schema.prisma — Database models for Neon (spec > Data Model)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  createdAt DateTime @default(now())
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Game {
+  id          String                 @id @default(uuid())
+  title       String
+  slug        String                 @unique
+  thumbnail   String
+  description String
+  platforms   GamePlatformProgress[]
+  credentials GameCredential[]
+  createdAt   DateTime               @default(now())
+}
+
+model GamePlatformProgress {
+  id                String   @id @default(uuid())
+  gameId            String
+  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  platform          String   // "PLAYSTATION" | "XBOX" | "PC" | "MOBILE"
+  gamertag          String
+  level             Int
+  achievementsCount Int
+  totalAchievements Int
+  lastPlayed        DateTime @default(now())
+}
+
+model GameCredential {
+  id        String   @id @default(uuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  platform  String   // "PLAYSTATION" | "XBOX" | "PC" | "MOBILE"
+  username  String
+  password  String
+  updatedAt DateTime @updatedAt
+}

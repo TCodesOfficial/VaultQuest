@@ -19,7 +19,7 @@ Build mode: learn
   Learner check: Open http://localhost:5173 — you should see the dark VaultQuest dashboard with game cards. Does it feel like the launcher aesthetic we planned?
   Commit: `Scaffold full-stack app with game card dashboard`
 
-- [ ] **2. Empty state and popular-games quick-add**
+- [x] **2. Empty state and popular-games quick-add**
   Becomes usable: With zero games, a designed banner offers a curated "Popular Games" list to add in one click.
   Why now: The learner pulled this forward from its original slot — the empty-library arrival experience matters to them and it finishes the dashboard's promised states before the data layer lands. Reordered from slice 6 (see Revisions).
   PRD ref: `prd.md > Features and Behavior` (2. Game Library Dashboard), `prd.md > States and Boundaries` (First Use / Empty State)
@@ -29,7 +29,7 @@ Build mode: learn
   Learner check: Start from an empty library and add a game from Popular Games. Is the flow smooth?
   Commit: `Add empty state and popular-games quick-add`
 
-- [ ] **3. Games and platform progress persist across restarts**
+- [x] **3. Games and platform progress persist across restarts**
   Becomes usable: The same dashboard data now comes from the database; restarting the backend keeps every game and its per-platform progress intact.
   Why now: Prisma + Neon + NestJS integration is the exact "nightmare" you want to master — proving it second means every later feature builds on a working data layer. This is also where the kernel's data shape (one game, many platforms) lands for real.
   PRD ref: `prd.md > The Core Journey` (step 3), `prd.md > States and Boundaries` (Normal Loaded State)
