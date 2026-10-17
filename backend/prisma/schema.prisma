@@ -32,6 +32,8 @@ model Game {
   title       String
   slug        String                 @unique
   thumbnail   String
+  thumbnails  String[]
+  genres      String[]
   description String
   platforms   GamePlatformProgress[]
   credentials GameCredential[]

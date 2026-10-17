@@ -15,8 +15,11 @@ export interface Game {
   title: string;
   slug: string;
   thumbnail: string;
+  thumbnails: string[];
+  genres: string[];
   description: string;
   platforms: PlatformProgress[];
+  createdAt: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001/api/v1';

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Gamepad2, Layers, Plus, Trophy } from 'lucide-react';
+import { ChevronDown, Gamepad2, Layers, Plus, Search, Trophy, X } from 'lucide-react';
 import Navbar from './components/Navbar.tsx';
 import GameCardGrid from './components/GameCardGrid.tsx';
 import EmptyLibrary from './components/EmptyLibrary.tsx';
@@ -12,6 +12,12 @@ import type { Game } from './services/api.ts';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
 export type Theme = 'dark' | 'light';
+
+type SortKey = 'recent' | 'title' | 'level' | 'achievements' | 'platforms';
+
+const maxLevelOf = (game: Game) => game.platforms.reduce((max, p) => Math.max(max, p.level), 0);
+const totalUnlockedOf = (game: Game) =>
+  game.platforms.reduce((sum, p) => sum + p.achievementsCount, 0);
 
 const heroItem: Variants = {
   hidden: { opacity: 0, y: 18, filter: 'blur(8px)' },
@@ -34,6 +40,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [libQuery, setLibQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('recent');
   const [theme, setTheme] = useState<Theme>(() =>
     typeof window !== 'undefined' && localStorage.getItem('app-theme') === 'light'
       ? 'light'
@@ -66,6 +74,35 @@ export default function App() {
     (sum, g) => sum + g.platforms.reduce((s, p) => s + p.achievementsCount, 0),
     0
   );
+
+  const visibleGames = useMemo(() => {
+    const query = libQuery.trim().toLowerCase();
+    const filtered = query
+      ? games.filter(
+          (game) =>
+            game.title.toLowerCase().includes(query) ||
+            game.genres.some((genre) => genre.toLowerCase().includes(query)) ||
+            game.platforms.some((progress) =>
+              progress.gamertag.toLowerCase().includes(query)
+            )
+        )
+      : games;
+    return [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case 'level':
+          return maxLevelOf(b) - maxLevelOf(a);
+        case 'achievements':
+          return totalUnlockedOf(b) - totalUnlockedOf(a);
+        case 'platforms':
+          return b.platforms.length - a.platforms.length;
+        case 'recent':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [games, libQuery, sortKey]);
 
   const stats = [
     { icon: Gamepad2, value: String(games.length), label: 'Games tracked' },
@@ -180,19 +217,80 @@ export default function App() {
           {status === 'ready' && games.length > 0 && (
             <section>
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="mb-4 flex items-center gap-3"
+                initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="mb-4 text-center"
               >
-                <h2 className="text-xl font-extrabold tracking-tight text-on-surface">
-                  My Games
+                <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  My <span className="text-flow">Games</span>
                 </h2>
-                <span className="rounded-full border border-outline bg-surface-glass px-2.5 py-1 text-[0.64rem] font-bold tracking-widest text-on-surface-muted uppercase backdrop-blur-md">
-                  {games.length} tracked
-                </span>
+                <div className="mt-2.5 flex justify-center">
+                  <span className="rounded-full border border-outline bg-surface-glass px-3.5 py-1.5 text-[0.66rem] font-bold tracking-widest text-on-surface-muted uppercase backdrop-blur-md">
+                    {visibleGames.length === games.length
+                      ? `${games.length} tracked`
+                      : `${visibleGames.length} of ${games.length} tracked`}
+                  </span>
+                </div>
               </motion.div>
-              <GameCardGrid games={games} onOpenGame={setSelectedGame} />
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
+                className="mb-6 flex flex-wrap items-center justify-center gap-2.5"
+              >
+                <label className="group flex w-60 items-center gap-2 rounded-full border border-outline bg-surface-glass/70 px-3.5 py-2 backdrop-blur-md transition-colors duration-200 focus-within:border-primary/50">
+                  <Search
+                    size={14}
+                    className="shrink-0 text-on-surface-muted transition-colors duration-200 group-focus-within:text-primary"
+                  />
+                  <input
+                    value={libQuery}
+                    onChange={(event) => setLibQuery(event.target.value)}
+                    placeholder="Search your library…"
+                    aria-label="Search my games"
+                    className="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-muted focus:outline-none"
+                  />
+                  {libQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setLibQuery('')}
+                      aria-label="Clear library search"
+                      className="shrink-0 text-on-surface-muted transition-colors duration-200 hover:text-on-surface"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </label>
+
+                <div className="relative">
+                  <select
+                    value={sortKey}
+                    onChange={(event) => setSortKey(event.target.value as SortKey)}
+                    aria-label="Sort games"
+                    className="appearance-none rounded-full border border-outline bg-surface-glass/70 py-2 pr-8 pl-4 text-xs font-bold text-on-surface-secondary backdrop-blur-md transition-colors duration-200 focus:border-primary/50 focus:outline-none"
+                  >
+                    <option value="recent">Recently added</option>
+                    <option value="title">Title A–Z</option>
+                    <option value="level">Highest level</option>
+                    <option value="achievements">Most achievements</option>
+                    <option value="platforms">Most platforms</option>
+                  </select>
+                  <ChevronDown
+                    size={14}
+                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted"
+                  />
+                </div>
+              </motion.div>
+
+              {visibleGames.length === 0 ? (
+                <p className="py-12 text-center text-on-surface-secondary">
+                  No games match “{libQuery}” — try a different title, genre, or gamertag.
+                </p>
+              ) : (
+                <GameCardGrid games={visibleGames} onOpenGame={setSelectedGame} />
+              )}
             </section>
           )}
         </main>

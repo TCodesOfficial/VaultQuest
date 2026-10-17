@@ -1,9 +1,10 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import type { Game } from '../services/api.ts';
 import { PLATFORM_DOT, PLATFORM_PILL } from './platformTheme.ts';
+import { useSlideshow } from '../hooks/useSlideshow.ts';
 
 const PALETTES = [
   'linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%)',
@@ -45,10 +46,12 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     .slice(0, 2)
     .toUpperCase();
 
-  const hasThumbnail = Boolean(game.thumbnail);
+  const slides = game.thumbnails.length > 0 ? game.thumbnails : [game.thumbnail];
+  const slideIndex = useSlideshow(slides.length);
+  const hasThumbnail = Boolean(slides[slideIndex]);
   const artStyle: CSSProperties = hasThumbnail
     ? {
-        backgroundImage: `url('${game.thumbnail}')`,
+        backgroundImage: `url('${slides[slideIndex]}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }
@@ -73,7 +76,18 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
         aria-label={`Open ${game.title}`}
         className="card-frame group relative flex h-full min-h-72 w-full flex-col overflow-hidden text-left"
       >
-        <div className="game-thumb absolute inset-0" style={artStyle} aria-hidden="true" />
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={slideIndex}
+            className="game-thumb absolute inset-0"
+            style={artStyle}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+            aria-hidden="true"
+          />
+        </AnimatePresence>
 
         {!hasThumbnail && (
           <div

@@ -10,7 +10,10 @@ interface PrismaGameRecord {
   title: string;
   slug: string;
   thumbnail: string;
+  thumbnails: string[];
+  genres: string[];
   description: string;
+  createdAt: Date;
   platforms: {
     id: string;
     platform: string;
@@ -28,7 +31,10 @@ function mapGame(record: PrismaGameRecord): Game {
     title: record.title,
     slug: record.slug,
     thumbnail: record.thumbnail,
+    thumbnails: record.thumbnails,
+    genres: record.genres,
     description: record.description,
+    createdAt: record.createdAt.toISOString(),
     platforms: record.platforms.map((progress) => ({
       id: progress.id,
       platform: progress.platform as PlatformProgress['platform'],
@@ -92,7 +98,10 @@ export class GamesService {
           title: entry.title,
           slug: entry.slug,
           thumbnail: entry.thumbnail,
+          thumbnails: entry.thumbnails,
+          genres: entry.genres,
           description: entry.description,
+          createdAt: new Date(entry.createdAt),
           platforms: {
             create: entry.platforms.map((progress) => ({
               platform: progress.platform,

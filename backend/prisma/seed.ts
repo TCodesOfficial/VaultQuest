@@ -20,7 +20,10 @@ async function main(): Promise<void> {
     const data = {
       title: game.title,
       thumbnail: game.thumbnail,
+      thumbnails: game.thumbnails,
+      genres: game.genres,
       description: game.description,
+      createdAt: new Date(game.createdAt),
       platforms: { create: platformRows(game) },
     };
     await prisma.game.upsert({
@@ -28,7 +31,10 @@ async function main(): Promise<void> {
       update: {
         title: data.title,
         thumbnail: data.thumbnail,
+        thumbnails: data.thumbnails,
+        genres: data.genres,
         description: data.description,
+        createdAt: data.createdAt,
         platforms: { deleteMany: {}, create: platformRows(game) },
       },
       create: { slug: game.slug, ...data },

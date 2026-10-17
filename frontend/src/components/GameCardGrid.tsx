@@ -34,7 +34,7 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
       className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
     >
       {games.map((game) => (
-        <motion.div key={game.id} variants={item} className="h-full">
+        <motion.div key={game.id} variants={item} layout className="h-full">
           <GameCard game={game} onOpen={onOpenGame} />
         </motion.div>
       ))}

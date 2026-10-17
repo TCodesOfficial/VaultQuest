@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AtSign, BarChart3, ChevronDown, Layers, Lock, Trophy, X } from 'lucide-react';
 import { fetchGame } from '../services/api.ts';
 import type { Game } from '../services/api.ts';
+import { useSlideshow } from '../hooks/useSlideshow.ts';
 import {
   PLATFORM_BG,
   PLATFORM_PILL,
@@ -57,6 +58,12 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
   }, [game, onClose]);
 
   const active = detail ?? game;
+  const heroSlides = active
+    ? active.thumbnails.length > 0
+      ? active.thumbnails
+      : [active.thumbnail]
+    : [];
+  const heroIndex = useSlideshow(heroSlides.length);
   const platforms = active?.platforms ?? [];
   const byLevel = [...platforms].sort((a, b) => b.level - a.level);
   const peak = byLevel[0];
@@ -113,11 +120,18 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
             className="absolute inset-y-0 right-0 flex w-full flex-col border-l border-outline bg-surface/95 backdrop-blur-2xl sm:w-[70vw]"
           >
             <div className="relative h-44 shrink-0 overflow-hidden sm:h-56">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url('${active.thumbnail}')` }}
-                aria-hidden="true"
-              />
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={heroIndex}
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url('${heroSlides[heroIndex] ?? active.thumbnail}')` }}
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                  aria-hidden="true"
+                />
+              </AnimatePresence>
               <div
                 className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"
                 aria-hidden="true"
