@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Gamepad2, Layers, Trophy } from 'lucide-react';
+import { Gamepad2, Layers, Plus, Trophy } from 'lucide-react';
 import Navbar from './components/Navbar.tsx';
 import GameCardGrid from './components/GameCardGrid.tsx';
 import EmptyLibrary from './components/EmptyLibrary.tsx';
@@ -194,6 +194,23 @@ export default function App() {
             </section>
           )}
         </main>
+
+        {status === 'ready' && games.length > 0 && !showPicker && (
+          <motion.button
+            type="button"
+            onClick={() => setShowPicker(true)}
+            initial={{ opacity: 0, scale: 0.6, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+            aria-label="Add games to your library"
+            className="fixed right-5 bottom-5 z-40 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-highlight px-5 py-3.5 text-sm font-bold text-white shadow-[0_6px_28px_rgba(34,211,238,0.45)] ring-1 ring-white/20 sm:right-7 sm:bottom-7"
+          >
+            <Plus size={18} strokeWidth={3} />
+            Add Games
+          </motion.button>
+        )}
 
         <PopularGamesModal
           open={showPicker}
