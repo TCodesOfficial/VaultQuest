@@ -1,0 +1,430 @@
+@import 'tailwindcss';
+
+@custom-variant light (&:where(.light, .light *));
+
+/* ---------- Design tokens (dark = default, html.light flips them) ---------- */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --surface: #0b0f19;
+  --surface-raised: rgba(17, 24, 39, 0.78);
+  --surface-raised-hover: rgba(36, 48, 68, 0.95);
+  --surface-glass: rgba(11, 15, 25, 0.65);
+
+  /* content colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --outline: rgba(148, 163, 184, 0.16);
+
+  /* brand roles */
+  --primary: #3b82f6;
+  --primary-strong: #2563eb;
+  --secondary: #fbbf24;
+  --secondary-strong: #f59e0b;
+  --tertiary: #a855f7;
+  --highlight: #22d3ee;
+  --success: #10b981;
+}
+
+html.light {
+  color-scheme: light;
+
+  --surface: #f1f5f9;
+  --surface-raised: rgba(255, 255, 255, 0.78);
+  --surface-raised-hover: rgba(255, 255, 255, 0.95);
+  --surface-glass: rgba(255, 255, 255, 0.72);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --outline: rgba(15, 23, 42, 0.14);
+
+  --primary: #2563eb;
+  --primary-strong: #1d4ed8;
+  --secondary: #d97706;
+  --secondary-strong: #b45309;
+  --tertiary: #9333ea;
+  --highlight: #0891b2;
+  --success: #059669;
+}
+
+/* Semantic utilities: bg-primary, text-secondary, border-outline, ... (theme-aware) */
+@theme inline {
+  --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-raised-hover: var(--surface-raised-hover);
+  --color-surface-glass: var(--surface-glass);
+
+  --color-on-surface: var(--text-primary);
+  --color-on-surface-secondary: var(--text-secondary);
+  --color-on-surface-muted: var(--text-muted);
+  --color-outline: var(--outline);
+
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-secondary: var(--secondary);
+  --color-secondary-strong: var(--secondary-strong);
+  --color-tertiary: var(--tertiary);
+  --color-highlight: var(--highlight);
+  --color-success: var(--success);
+}
+
+/* Static raw palette — decorative art, fallbacks, overlays */
+@theme {
+  --color-ink-950: #070a12;
+  --color-ink-900: #0b0f19;
+  --color-ink-800: #111827;
+  --color-ink-700: #1f2937;
+}
+
+/* ---------- Base ---------- */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--surface);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 45%, transparent);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-strong), #1e40af);
+  border-radius: 999px;
+  border: 2px solid var(--surface);
+}
+
+/* ---------- Ambient animated scene ---------- */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scene__base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 18% -8%, color-mix(in srgb, var(--primary-strong) 22%, transparent), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--tertiary) 14%, transparent), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 70% 15%, color-mix(in srgb, var(--secondary-strong) 7%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, var(--primary-strong) 8%) 0%, var(--surface) 45%, color-mix(in srgb, var(--surface) 94%, #000 6%) 100%);
+}
+
+.scene__grid {
+  position: absolute;
+  inset: -60px;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--primary) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 6%, transparent) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, black 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, black 25%, transparent 78%);
+  animation: gridDrift 70s linear infinite;
+}
+
+html.light .scene__grid {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--primary-strong) 20%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary-strong) 20%, transparent) 1px, transparent 1px);
+}
+
+.scene__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+html:not(.light) .scene__orb {
+  mix-blend-mode: screen;
+}
+
+html.light .scene__orb {
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+
+.scene__orb--1 {
+  width: 480px;
+  height: 480px;
+  top: -140px;
+  left: -120px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary-strong) 50%, transparent), transparent 65%);
+  animation: orbFloatA 24s ease-in-out infinite alternate;
+}
+
+.scene__orb--2 {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  right: -100px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--secondary-strong) 30%, transparent), transparent 65%);
+  animation: orbFloatB 30s ease-in-out infinite alternate;
+}
+
+.scene__orb--3 {
+  width: 360px;
+  height: 360px;
+  top: 38%;
+  right: 22%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tertiary) 30%, transparent), transparent 65%);
+  animation: orbFloatC 27s ease-in-out infinite alternate;
+}
+
+.scene__scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 160px;
+  top: -160px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--primary) 8%, transparent) 45%,
+    color-mix(in srgb, var(--highlight) 5%, transparent) 55%,
+    transparent
+  );
+  animation: scanSweep 13s linear infinite;
+}
+
+/* ---------- Motion utilities (keyframe-driven) ---------- */
+
+.text-flow {
+  background: linear-gradient(92deg, var(--text-primary) 5%, var(--primary) 45%, var(--secondary) 75%, var(--text-primary) 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: brandFlow 8s linear infinite;
+}
+
+.icon-glow {
+  color: var(--primary);
+  animation: iconGlow 3.4s ease-in-out infinite;
+}
+
+.pulse-ring {
+  animation: pulseRing 2.6s ease-out infinite;
+}
+
+.edge-glow::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    var(--primary-strong) 35%,
+    var(--secondary) 50%,
+    var(--primary-strong) 65%,
+    transparent 95%
+  );
+  background-size: 200% 100%;
+  animation: borderFlow 7s linear infinite;
+  opacity: 0.8;
+}
+
+/* ---------- Game card ---------- */
+
+.card-frame {
+  position: relative;
+  border-radius: 1.5rem;
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--surface-raised), var(--surface-raised)),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 65%, transparent),
+      color-mix(in srgb, var(--highlight) 35%, transparent) 35%,
+      color-mix(in srgb, var(--secondary) 55%, transparent) 70%,
+      color-mix(in srgb, var(--primary) 50%, transparent)
+    );
+  background-size:
+    100% 100%,
+    260% 260%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.card-frame:hover,
+.card-frame:focus-visible {
+  box-shadow:
+    0 0 28px color-mix(in srgb, var(--primary) 40%, transparent),
+    0 18px 38px -18px rgba(0, 0, 0, 0.75);
+  background-image:
+    linear-gradient(var(--surface-raised-hover), var(--surface-raised-hover)),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 100%, transparent),
+      color-mix(in srgb, var(--highlight) 70%, transparent) 40%,
+      color-mix(in srgb, var(--secondary) 90%, transparent) 75%,
+      color-mix(in srgb, var(--primary) 95%, transparent)
+    );
+  animation: borderFlow 2.6s linear infinite;
+  outline: none;
+}
+
+html.light .card-frame:hover,
+html.light .card-frame:focus-visible {
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--primary-strong) 25%, transparent),
+    0 18px 38px -18px rgba(15, 23, 42, 0.35);
+}
+
+.game-thumb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.4px);
+  background-size: 14px 14px;
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(200deg, black 20%, transparent 75%);
+  mask-image: linear-gradient(200deg, black 20%, transparent 75%);
+}
+
+.game-thumb::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 80%
+  );
+  transform: translateX(-130%) skewX(-18deg);
+  animation: sheenSweep 7.5s ease-in-out infinite;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes gridDrift {
+  to {
+    background-position: 46px 460px, 460px 46px;
+  }
+}
+
+@keyframes orbFloatA {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(120px, 80px, 0) scale(1.15);
+  }
+}
+
+@keyframes orbFloatB {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-140px, -70px, 0) scale(0.92);
+  }
+}
+
+@keyframes orbFloatC {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.9);
+  }
+  to {
+    transform: translate3d(-90px, 110px, 0) scale(1.2);
+  }
+}
+
+@keyframes scanSweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(100vh + 340px));
+  }
+}
+
+@keyframes borderFlow {
+  to {
+    background-position: 200% 0, 200% 0;
+  }
+}
+
+@keyframes sheenSweep {
+  0%,
+  62% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  86%,
+  100% {
+    transform: translateX(330%) skewX(-18deg);
+  }
+}
+
+@keyframes brandFlow {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+@keyframes iconGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--primary) 50%, transparent));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--primary) 90%, transparent));
+  }
+}
+
+@keyframes pulseRing {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  55% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

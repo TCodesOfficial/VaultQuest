@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultQuest — Technical Blueprint Companion</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --primary: #3b82f6;
+      --accent: #f59e0b;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --code-bg: #030712;
+      --success: #10b981;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      margin: 0.25rem 0;
+      background: linear-gradient(135deg, #60a5fa, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      color: #e5e7eb;
+    }
+    /* Architecture Diagram */
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    @media(min-width: 768px) {
+      .arch-flow {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+    .arch-box {
+      flex: 1;
+      background: #172033;
+      border: 1px solid #2b384e;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .arch-arrow {
+      font-size: 1.5rem;
+      color: var(--accent);
+      text-align: center;
+    }
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      border: 1px solid #1f2937;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media(min-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      background: #1e293b;
+      margin: 0.2rem;
+      border: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Technical Specification</span>
+      <h1>VaultQuest Architecture</h1>
+      <p style="color: var(--text-muted);">Decoupled React (Vite) + NestJS API + Neon PostgreSQL + WebSockets</p>
+    </header>
+
+    <!-- Architecture Diagram -->
+    <div class="card">
+      <h2>🏗️ System Architecture & Data Flow</h2>
+      <div class="arch-flow">
+        <div class="arch-box">
+          <strong style="color: #60a5fa;">Frontend (React Vite)</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0;">Port 5173 • Browser UI</p>
+          <span class="pill">Onboarding Modal</span>
+          <span class="pill">GameCard Grid</span>
+          <span class="pill">Credentials Vault</span>
+        </div>
+        <div class="arch-arrow">⇄ <small style="display:block; font-size:0.7rem; color:var(--text-muted);">REST / WebSocket</small></div>
+        <div class="arch-box">
+          <strong style="color: #f59e0b;">Backend (NestJS API)</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0;">Port 3001 • Global /api/v1</p>
+          <span class="pill">AuthModule</span>
+          <span class="pill">GamesModule</span>
+          <span class="pill">EventsGateway</span>
+        </div>
+        <div class="arch-arrow">⇄ <small style="display:block; font-size:0.7rem; color:var(--text-muted);">Prisma Client</small></div>
+        <div class="arch-box">
+          <strong style="color: #10b981;">Database (Neon Cloud)</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0;">PostgreSQL Serverless</p>
+          <span class="pill">User & Session</span>
+          <span class="pill">Game & Progress</span>
+          <span class="pill">Credentials</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Endpoints and Real-Time Pipes -->
+    <div class="card">
+      <h2>📡 API Contracts (/api/v1) & Real-Time</h2>
+      <div class="grid-2">
+        <div>
+          <h3>REST Endpoints</h3>
+          <pre><code>GET  /api/v1/auth/session
+POST /api/v1/auth/login
+GET  /api/v1/games
+GET  /api/v1/games/:id
+GET  /api/v1/games/:id/credentials
+POST /api/v1/games/:id/credentials</code></pre>
+        </div>
+        <div>
+          <h3>WebSocket Events</h3>
+          <pre><code>// Client connects: ws://localhost:3001
+socket.on('connect', () => ...)
+
+// Real-time progress updates:
+socket.on('game:progress_updated', (data) => {
+  // Updates UI without page refresh!
+})</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sizing & Safety -->
+    <div class="card">
+      <h2>🛡️ Resilience & Fallbacks</h2>
+      <ul style="color: var(--text-muted); padding-left: 1.25rem;">
+        <li><strong style="color: #fff;">Cloud DB Fallback:</strong> If Neon connection has latency or credential delay, Prisma service uses local memory seed so demo never stalls.</li>
+        <li><strong style="color: #fff;">WebSocket Graceful Degradation:</strong> If socket drops, client automatically queries REST endpoints without broken states.</li>
+        <li><strong style="color: #fff;">2-Hour Session Expiry:</strong> Clean JWT/session management with automatic validation.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

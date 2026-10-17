@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultQuest — Interactive PRD Companion</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #f59e0b;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      margin: 0.25rem 0;
+      background: linear-gradient(135deg, #60a5fa, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 650px;
+      margin: 0.5rem auto 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #e5e7eb;
+    }
+    /* SVG Journey Diagram */
+    .journey-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    @media(min-width: 768px) {
+      .journey-diagram {
+        flex-direction: row;
+        align-items: stretch;
+      }
+    }
+    .step-box {
+      flex: 1;
+      background: #1a2234;
+      border: 1px solid #2d3748;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      position: relative;
+    }
+    .step-number {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+    .step-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .step-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    /* Tabs & Reveals */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: #1f2937;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-hover);
+    }
+    .tab-content {
+      display: none;
+      background: #151d2f;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid #243048;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .criteria-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .criteria-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #222d42;
+      font-size: 0.95rem;
+    }
+    .criteria-item:last-child {
+      border-bottom: none;
+    }
+    .check-icon {
+      color: var(--success);
+      font-weight: bold;
+    }
+    .color-swatch-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      flex: 1;
+      min-width: 140px;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Product Requirements Document</span>
+      <h1>VaultQuest</h1>
+      <p class="lead">Your Universal Gaming Identity, Everywhere</p>
+    </header>
+
+    <!-- Core Journey Flow -->
+    <div class="card">
+      <h2>🚀 Core User Journey</h2>
+      <div class="journey-diagram">
+        <div class="step-box">
+          <div class="step-number">PHASE 1</div>
+          <div class="step-title">3-Slide Onboarding</div>
+          <p class="step-desc">Relatable story: The pain of lost passwords & stranded saves → VaultQuest solution → Quick 2-step UI highlight tour.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-number">PHASE 2</div>
+          <div class="step-title">Dashboard Hub</div>
+          <p class="step-desc">Responsive game grid (4-5 desktop, 2 mobile) showing cover thumbnails, gamertags, and multi-platform icons.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-number">PHASE 3</div>
+          <div class="step-title">Cross-Platform Analytics</div>
+          <p class="step-desc">Side-by-side progression drawer comparing Mobile vs. PC vs. Console levels and achievements.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-number">PHASE 4</div>
+          <div class="step-title">Credentials Vault</div>
+          <p class="step-desc">Tap "Check Login Details" to immediately view & copy username/password for any game platform.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Feature Explorer -->
+    <div class="card">
+      <h2>🔍 Feature & Acceptance Explorer</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('onboarding')">1. Onboarding & Tour</button>
+        <button class="tab-btn" onclick="switchTab('dashboard')">2. Game Library</button>
+        <button class="tab-btn" onclick="switchTab('analytics')">3. Cross-Platform Detail</button>
+        <button class="tab-btn" onclick="switchTab('vault')">4. Credentials Vault</button>
+        <button class="tab-btn" onclick="switchTab('theme')">5. Dual Theme</button>
+      </div>
+
+      <div id="tab-onboarding" class="tab-content active">
+        <p><strong>Goal:</strong> Emotionally connect with the player's pain before delivering the solution.</p>
+        <ul class="criteria-list">
+          <li class="criteria-item"><span class="check-icon">✓</span> 3 narrative slides covering pain, solution, and mechanism.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> Interactive guided tour highlighting 3 core UI zones.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> "Skip Tour" button lets power users jump straight into their library.</li>
+        </ul>
+      </div>
+
+      <div id="tab-dashboard" class="tab-content">
+        <p><strong>Goal:</strong> Visually striking game cards with zero spreadsheet feel.</p>
+        <ul class="criteria-list">
+          <li class="criteria-item"><span class="check-icon">✓</span> Card grid adapts smoothly: 4-5 on desktop, 2-3 on tablet, 2 on mobile.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> High-res game artwork thumbnails, gamertags, platform badges, and levels.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> First-use banner suggesting popular titles to add with one click.</li>
+        </ul>
+      </div>
+
+      <div id="tab-analytics" class="tab-content">
+        <p><strong>Goal:</strong> The "oh that's cool" moment: seeing progress across platforms side-by-side.</p>
+        <ul class="criteria-list">
+          <li class="criteria-item"><span class="check-icon">✓</span> Tapping a card opens the Game Detail modal with full cover art.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> Side-by-side analytics compares Mobile Level vs. PC Level and achievements.</li>
+        </ul>
+      </div>
+
+      <div id="tab-vault" class="tab-content">
+        <p><strong>Goal:</strong> Instant access to game accounts when switching consoles or devices.</p>
+        <ul class="criteria-list">
+          <li class="criteria-item"><span class="check-icon">✓</span> Prominent primary action button: "Check Login Details".</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> Stored username and password revealed with mask/unmask toggle & one-click copy.</li>
+        </ul>
+      </div>
+
+      <div id="tab-theme" class="tab-content">
+        <p><strong>Goal:</strong> Gamer aesthetic with flexible viewing preference.</p>
+        <ul class="criteria-list">
+          <li class="criteria-item"><span class="check-icon">✓</span> Dark mode (deep slate navy + neon glow) as default.</li>
+          <li class="criteria-item"><span class="check-icon">✓</span> Light mode (clean, high-contrast, modern) toggle in top navigation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Visual Identity -->
+    <div class="card">
+      <h2>🎨 Look and Feel Direction</h2>
+      <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Inspired by modern launcher aesthetics (Epic Games Launcher energy) with futuristic rounded cards and neon accents.</p>
+      <div class="color-swatch-group">
+        <div class="swatch" style="background: #2563eb; color: #fff;">Electric Blue<br><small>#2563EB (Primary)</small></div>
+        <div class="swatch" style="background: #f59e0b; color: #000;">Vibrant Gold<br><small>#F59E0B (Accent)</small></div>
+        <div class="swatch" style="background: #0b0f19; color: #9ca3af; border: 1px solid #1f2937;">Deep Slate Navy<br><small>#0B0F19 (Dark BG)</small></div>
+        <div class="swatch" style="background: #ffffff; color: #111827;">Crisp Light<br><small>#FFFFFF (Light Mode)</small></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+  </script>
+</body>
+</html>
