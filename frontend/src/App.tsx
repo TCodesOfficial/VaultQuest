@@ -220,67 +220,62 @@ export default function App() {
                 initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="mb-4 text-center"
+                className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
               >
-                <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                  My <span className="text-flow">Games</span>
-                </h2>
-                <div className="mt-2.5 flex justify-center">
-                  <span className="rounded-full border border-outline bg-surface-glass px-3.5 py-1.5 text-[0.66rem] font-bold tracking-widest text-on-surface-muted uppercase backdrop-blur-md">
+                <div className="text-left">
+                  <h2 className="text-3xl font-extrabold tracking-tight text-on-surface sm:text-4xl">
+                    My <span className="text-flow">Games</span>
+                  </h2>
+                  <span className="mt-2 inline-block rounded-full border border-outline bg-surface-glass px-3.5 py-1.5 text-[0.66rem] font-bold tracking-widest text-on-surface-muted uppercase backdrop-blur-md">
                     {visibleGames.length === games.length
                       ? `${games.length} tracked`
                       : `${visibleGames.length} of ${games.length} tracked`}
                   </span>
                 </div>
-              </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
-                className="mb-6 flex flex-wrap items-center justify-center gap-2.5"
-              >
-                <label className="group flex w-60 items-center gap-2 rounded-full border border-outline bg-surface-glass/70 px-3.5 py-2 backdrop-blur-md transition-colors duration-200 focus-within:border-primary/50">
-                  <Search
-                    size={14}
-                    className="shrink-0 text-on-surface-muted transition-colors duration-200 group-focus-within:text-primary"
-                  />
-                  <input
-                    value={libQuery}
-                    onChange={(event) => setLibQuery(event.target.value)}
-                    placeholder="Search your library…"
-                    aria-label="Search my games"
-                    className="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-muted focus:outline-none"
-                  />
-                  {libQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setLibQuery('')}
-                      aria-label="Clear library search"
-                      className="shrink-0 text-on-surface-muted transition-colors duration-200 hover:text-on-surface"
+                <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto sm:justify-end">
+                  <label className="group flex w-full items-center gap-2.5 rounded-full border border-outline bg-surface-glass/70 px-4 py-2.5 backdrop-blur-md transition-colors duration-200 focus-within:border-primary/50 sm:w-80">
+                    <Search
+                      size={16}
+                      className="shrink-0 text-on-surface-muted transition-colors duration-200 group-focus-within:text-primary"
+                    />
+                    <input
+                      value={libQuery}
+                      onChange={(event) => setLibQuery(event.target.value)}
+                      placeholder="Search your library…"
+                      aria-label="Search my games"
+                      className="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-muted focus:outline-none"
+                    />
+                    {libQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setLibQuery('')}
+                        aria-label="Clear library search"
+                        className="shrink-0 text-on-surface-muted transition-colors duration-200 hover:text-on-surface"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </label>
+
+                  <div className="relative">
+                    <select
+                      value={sortKey}
+                      onChange={(event) => setSortKey(event.target.value as SortKey)}
+                      aria-label="Sort games"
+                      className="appearance-none rounded-full border border-outline bg-surface-glass/70 py-2.5 pr-9 pl-4 text-sm font-bold text-on-surface-secondary backdrop-blur-md transition-colors duration-200 focus:border-primary/50 focus:outline-none"
                     >
-                      <X size={13} />
-                    </button>
-                  )}
-                </label>
-
-                <div className="relative">
-                  <select
-                    value={sortKey}
-                    onChange={(event) => setSortKey(event.target.value as SortKey)}
-                    aria-label="Sort games"
-                    className="appearance-none rounded-full border border-outline bg-surface-glass/70 py-2 pr-8 pl-4 text-xs font-bold text-on-surface-secondary backdrop-blur-md transition-colors duration-200 focus:border-primary/50 focus:outline-none"
-                  >
-                    <option value="recent">Recently added</option>
-                    <option value="title">Title A–Z</option>
-                    <option value="level">Highest level</option>
-                    <option value="achievements">Most achievements</option>
-                    <option value="platforms">Most platforms</option>
-                  </select>
-                  <ChevronDown
-                    size={14}
-                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted"
-                  />
+                      <option value="recent">Recently added</option>
+                      <option value="title">Title A–Z</option>
+                      <option value="level">Highest level</option>
+                      <option value="achievements">Most achievements</option>
+                      <option value="platforms">Most platforms</option>
+                    </select>
+                    <ChevronDown
+                      size={15}
+                      className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted"
+                    />
+                  </div>
                 </div>
               </motion.div>
 

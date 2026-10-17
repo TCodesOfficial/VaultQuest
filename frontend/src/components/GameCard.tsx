@@ -3,8 +3,8 @@ import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import type { Game } from '../services/api.ts';
-import { PLATFORM_DOT, PLATFORM_PILL } from './platformTheme.ts';
-import { useSlideshow } from '../hooks/useSlideshow.ts';
+import { PLATFORM_PILL } from './platformTheme.ts';
+import { useSlideGallery } from '../hooks/useSlideGallery.ts';
 
 const PALETTES = [
   'linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%)',
@@ -46,16 +46,17 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     .slice(0, 2)
     .toUpperCase();
 
-  const slides = game.thumbnails.length > 0 ? game.thumbnails : [game.thumbnail];
-  const slideIndex = useSlideshow(slides.length);
-  const hasThumbnail = Boolean(slides[slideIndex]);
-  const artStyle: CSSProperties = hasThumbnail
-    ? {
-        backgroundImage: `url('${slides[slideIndex]}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    : { background: paletteFor(game.id) };
+  const slides = (game.thumbnails.length > 0 ? game.thumbnails : [game.thumbnail]).filter(
+    Boolean
+  );
+  const { index: slideIndex, ready } = useSlideGallery(slides);
+  const hasAnyThumbnail = slides.length > 0;
+  const slideReady = hasAnyThumbnail && ready[slideIndex];
+  const artStyle: CSSProperties = {
+    backgroundImage: `url('${slides[slideIndex] ?? ''}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  };
 
   return (
     <Tilt
@@ -76,20 +77,27 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
         aria-label={`Open ${game.title}`}
         className="card-frame group relative flex h-full min-h-72 w-full flex-col overflow-hidden text-left"
       >
+        <div
+          className="game-thumb absolute inset-0"
+          style={{ background: paletteFor(game.id) }}
+          aria-hidden="true"
+        />
         <AnimatePresence initial={false}>
-          <motion.div
-            key={slideIndex}
-            className="game-thumb absolute inset-0"
-            style={artStyle}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.9, ease: 'easeOut' }}
-            aria-hidden="true"
-          />
+          {slideReady && (
+            <motion.div
+              key={slideIndex}
+              className="game-thumb absolute inset-0"
+              style={artStyle}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              aria-hidden="true"
+            />
+          )}
         </AnimatePresence>
 
-        {!hasThumbnail && (
+        {!hasAnyThumbnail && (
           <div
             className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center pb-32"
             aria-hidden="true"
@@ -109,11 +117,15 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
           aria-hidden="true"
         />
 
-        <span className="absolute top-3 left-3 z-[2] flex gap-1.5" aria-hidden="true">
-          {game.platforms.map((progress) => (
+        <span className="absolute top-3 left-3 z-[2] flex items-center gap-1.5" aria-hidden="true">
+          {slides.map((_, position) => (
             <span
-              key={progress.id}
-              className={`h-2.5 w-2.5 rounded-full border-2 border-ink-950/70 ${PLATFORM_DOT[progress.platform]}`}
+              key={position}
+              className={`h-2.5 rounded-full transition-all duration-500 ${
+                position === slideIndex
+                  ? 'w-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]'
+                  : 'w-2.5 bg-white/40'
+              }`}
             />
           ))}
         </span>

@@ -15,8 +15,8 @@
 
   /* content colors */
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
   --outline: rgba(148, 163, 184, 0.16);
 
   /* brand roles */
@@ -38,8 +38,8 @@ html.light {
   --surface-glass: rgba(255, 255, 255, 0.72);
 
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  --text-secondary: #1e293b;
+  --text-muted: #475569;
   --outline: rgba(15, 23, 42, 0.14);
 
   --primary: #2563eb;
