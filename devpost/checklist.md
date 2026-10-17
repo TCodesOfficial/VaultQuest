@@ -39,15 +39,15 @@ Build mode: learn
   Learner check: Restart the backend, reload the page, and confirm your games and platform levels are all still there.
   Commit: `Persist games and platform progress with Prisma`
 
-- [ ] **4. Cross-platform comparison — the kernel moment**
+- [x] **4. Cross-platform comparison — the kernel moment**
   Becomes usable: Clicking a game card opens the detail modal with hero banner, active platforms, gamertag, and a side-by-side analytics view contrasting levels and achievements per platform (e.g., COD Mobile Level 42 vs PC Level 12).
   Why now: This is the unique kernel from the scope — the unified-identity "oh, that's cool" moment. It comes early so its feel can steer the remaining build (auth, vault, polish).
   PRD ref: `prd.md > The Core Journey` (step 4), `prd.md > Features and Behavior` (3. Game Detail & Cross-Platform Analytics), `prd.md > Screens and Layout` (Game Detail View)
-  Spec ref: `spec.md > Components` (GameDetailModal, CrossPlatformAnalytics), `spec.md > The Core Journey Through the System` (step 3)
-  Build: `GET /api/v1/games/:id` returns the game plus platform progress; GameDetailModal and CrossPlatformAnalytics components; card click opens the modal; Escape/backdrop closes it.
-  Verify (mechanical): `curl http://localhost:3001/api/v1/games/:id` returns the progress array; modal renders in the browser with both platforms compared; console clean.
+  Spec ref: `spec.md > Components` (GameDetailPanel, CrossPlatformAnalytics), `spec.md > The Core Journey Through the System` (step 3)
+  Build: `GET /api/v1/games/:id` returns the game plus platform progress; GameDetailPanel and CrossPlatformAnalytics components; card click opens the panel; Escape/backdrop closes it.
+  Verify (mechanical): `curl http://localhost:3001/api/v1/games/:id` returns the progress array; panel renders in the browser with both platforms compared; console clean.
   Learner check: Open Call of Duty from the grid — do the Mobile vs PC levels and achievements show side by side the way you pictured?
-  Commit: `Add game detail modal with cross-platform analytics`
+  Commit: `Add game detail panel with cross-platform analytics`
 
 - [ ] **5. Session auth, onboarding slides, and guided tour**
   Becomes usable: A first visit shows the 3-slide onboarding story then the lightweight spotlight tour; the backend issues and verifies sessions (`/api/v1/auth`), and a minimal login establishes that session.
@@ -81,7 +81,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 4 (cross-platform comparison running): grid, detail modal, analytics
+- [ ] Early usable behavior explored — after slice 4 (cross-platform comparison running): grid, detail panel, analytics
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -117,3 +117,4 @@ Activity mode:
 - "My Games" section heading added above the card grid (with a "N tracked" count chip) so the learner's ownership framing is visible in the UI.
 - Full-screen add-games experience: the popular-games picker went from a centered modal to a full-screen searchable catalog (search input with live filtering + clear, responsive tile grid) at the learner's direction.
 - Forward expectation recorded (learner, deferred to later phases): after adding a game, the flow should eventually carry the user into that game's details / platform sign-in — maps onto slice 4 (game detail), slice 5 (auth/login), slice 6 (credentials vault); consider connecting the picker's "Added" state to opening the game's detail view when those land.
+- Slice-4 detail view reworked at the learner's direction from a centered modal to a **right side drawer**: ~70% of the viewport on desktop (remaining 30% dimmed and clickable to close), full-screen on mobile with the X/Escape close; slides in from the right on a slower 0.55s eased transition with a synced backdrop fade for both open and close. Analytics gained two charts — a horizontal level-comparison bar plot and an SVG donut showing achievement share per platform with the unlocked total in the center — alongside the existing per-platform stat columns and the "leads by N levels" callout. Component renamed `GameDetailModal` → `GameDetailPanel` at the learner's direction (spec and checklist references updated).

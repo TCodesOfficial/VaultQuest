@@ -5,6 +5,7 @@ import { Gamepad2, Layers, Plus, Trophy } from 'lucide-react';
 import Navbar from './components/Navbar.tsx';
 import GameCardGrid from './components/GameCardGrid.tsx';
 import EmptyLibrary from './components/EmptyLibrary.tsx';
+import GameDetailPanel from './components/GameDetailPanel.tsx';
 import PopularGamesModal from './components/PopularGamesModal.tsx';
 import { fetchGames } from './services/api.ts';
 import type { Game } from './services/api.ts';
@@ -32,6 +33,7 @@ export default function App() {
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [theme, setTheme] = useState<Theme>(() =>
     typeof window !== 'undefined' && localStorage.getItem('app-theme') === 'light'
       ? 'light'
@@ -190,7 +192,7 @@ export default function App() {
                   {games.length} tracked
                 </span>
               </motion.div>
-              <GameCardGrid games={games} onOpenGame={() => {}} />
+              <GameCardGrid games={games} onOpenGame={setSelectedGame} />
             </section>
           )}
         </main>
@@ -217,6 +219,8 @@ export default function App() {
           onClose={() => setShowPicker(false)}
           onAdded={() => void loadGames()}
         />
+
+        <GameDetailPanel game={selectedGame} onClose={() => setSelectedGame(null)} />
       </div>
     </>
   );

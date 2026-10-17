@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
 import type { CSSProperties } from 'react';
-import type { Game, Platform } from '../services/api.ts';
+import type { Game } from '../services/api.ts';
+import { PLATFORM_DOT, PLATFORM_PILL } from './platformTheme.ts';
 
 const PALETTES = [
   'linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%)',
@@ -11,20 +12,6 @@ const PALETTES = [
   'linear-gradient(160deg, #065f46 0%, #059669 50%, #84cc16 100%)',
   'linear-gradient(160deg, #0f172a 0%, #334155 50%, #64748b 100%)',
 ];
-
-const PLATFORM_PILL: Record<Platform, string> = {
-  PLAYSTATION: 'border-primary/50 bg-primary/15 text-primary',
-  XBOX: 'border-success/50 bg-success/15 text-success',
-  PC: 'border-highlight/50 bg-highlight/15 text-highlight',
-  MOBILE: 'border-tertiary/50 bg-tertiary/15 text-tertiary',
-};
-
-const PLATFORM_DOT: Record<Platform, string> = {
-  PLAYSTATION: 'bg-primary',
-  XBOX: 'bg-success',
-  PC: 'bg-highlight',
-  MOBILE: 'bg-tertiary',
-};
 
 function paletteFor(id: string): string {
   let hash = 0;

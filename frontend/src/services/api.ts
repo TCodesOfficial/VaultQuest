@@ -48,3 +48,11 @@ export async function addGame(slug: string): Promise<Game> {
   }
   return response.json();
 }
+
+export async function fetchGame(id: string): Promise<Game> {
+  const response = await fetch(`${API_BASE}/games/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load game (HTTP ${response.status})`);
+  }
+  return response.json();
+}

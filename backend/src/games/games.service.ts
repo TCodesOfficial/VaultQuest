@@ -62,6 +62,17 @@ export class GamesService {
     return SEED_GAMES;
   }
 
+  async findOne(id: string): Promise<Game | null> {
+    if (this.prisma.isReady) {
+      const record = await this.prisma.game.findUnique({
+        where: { id },
+        include: { platforms: true },
+      });
+      return record ? mapGame(record) : null;
+    }
+    return this.library.find((game) => game.id === id) ?? null;
+  }
+
   async addGame(slug: string): Promise<Game | null> {
     const entry = SEED_GAMES.find((game) => game.slug === slug);
     if (!entry) {

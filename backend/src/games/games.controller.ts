@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { GamesService } from './games.service';
 
 @Controller('games')
@@ -13,6 +13,15 @@ export class GamesController {
   @Get('popular-games')
   findPopular() {
     return this.gamesService.findPopular();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const game = await this.gamesService.findOne(id);
+    if (!game) {
+      throw new NotFoundException(`No game with id "${id}"`);
+    }
+    return game;
   }
 
   @Post()
