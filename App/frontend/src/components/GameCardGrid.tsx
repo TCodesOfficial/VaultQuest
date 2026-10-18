@@ -4,8 +4,10 @@ import GameCard from './GameCard.tsx';
 import type { Game } from '../services/api.ts';
 import { hashSeed, seeded } from '../lib/random.ts';
 
-const FULL_TOP = 0.2;
-const FULL_BOTTOM = 0.55;
+const FULL_TOP = 0.4;
+const FULL_BOTTOM = 0.43;
+const GROWTH_START = 0.9;
+const FADE_END = 0.75;
 const TILT_RATIO = 0.22;
 const MAX_TILT = 7;
 const MIN_SCALE = 0.5;
@@ -15,6 +17,7 @@ interface Entry {
   centerY: number;
   scale: number;
   rotate: number;
+  opacity: number;
   tiltMul: number;
 }
 
@@ -58,7 +61,7 @@ function ScrollCard({ game, onOpenGame, register }: ScrollCardProps) {
           opacity: 0,
           x: (rand() * 2 - 1) * 16,
           y: 26 + rand() * 26,
-          scale: 0.85 + rand() * 0.05,
+          scale: 0.94 + rand() * 0.04,
         },
         animate: { opacity: 1, x: 0, y: 0, scale: 1 },
         transition: {
@@ -92,6 +95,7 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         centerY: documentCenterY(element),
         scale: existing?.scale ?? 1,
         rotate: existing?.rotate ?? 0,
+        opacity: existing?.opacity ?? 1,
         tiltMul: existing?.tiltMul ?? 0.7 + seeded(hashSeed(`${id}:tilt`))() * 0.6,
       });
     } else {
@@ -122,23 +126,35 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         const p = (entry.centerY - scrollY) / viewportH;
         let scale = 1;
         let rotate = 0;
+        let opacity = 1;
         if (p < FULL_TOP) {
           const u = Math.min((FULL_TOP - p) / FULL_TOP, 1);
           scale = 1 - (1 - MIN_SCALE) * u;
           const tiltT = Math.min((FULL_TOP - p) / TILT_RATIO, 1);
           rotate = -MAX_TILT * entry.tiltMul * tiltT;
         } else if (p > FULL_BOTTOM) {
-          const u = Math.min((p - FULL_BOTTOM) / (1 - FULL_BOTTOM), 1);
+          const u = Math.min((p - FULL_BOTTOM) / (GROWTH_START - FULL_BOTTOM), 1);
           scale = 1 - (1 - MIN_SCALE) * u;
           const tiltT = Math.min((p - FULL_BOTTOM) / TILT_RATIO, 1);
           rotate = MAX_TILT * entry.tiltMul * tiltT;
+          if (p > GROWTH_START) {
+            opacity = 0;
+          } else if (p > FADE_END) {
+            opacity = (GROWTH_START - p) / (GROWTH_START - FADE_END);
+          }
         }
-        if (Math.abs(scale - entry.scale) < 0.002 && Math.abs(rotate - entry.rotate) < 0.05) {
+        if (
+          Math.abs(scale - entry.scale) < 0.002 &&
+          Math.abs(rotate - entry.rotate) < 0.05 &&
+          Math.abs(opacity - entry.opacity) < 0.01
+        ) {
           continue;
         }
         entry.scale = scale;
         entry.rotate = rotate;
+        entry.opacity = opacity;
         entry.element.style.transform = `scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(2)}deg)`;
+        entry.element.style.opacity = opacity.toFixed(3);
       }
     };
 
