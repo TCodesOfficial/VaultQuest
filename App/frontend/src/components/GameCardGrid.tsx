@@ -4,11 +4,11 @@ import GameCard from './GameCard.tsx';
 import type { Game } from '../services/api.ts';
 import { hashSeed, seeded } from '../lib/random.ts';
 
-const FULL_TOP = 0.4;
-const FULL_BOTTOM = 0.43;
-const GROWTH_START = 0.9;
-const FADE_END = 0.75;
-const TILT_RATIO = 0.22;
+const HIDDEN_BELOW = 0.9; // 10% from bottom — entrance line
+const FADE_END = 0.85; // 15% from bottom — fully visible
+const ACTIVE_BOTTOM = 0.7; // 30% from bottom — full scale begins
+const ACTIVE_TOP = 0.25; // 75% from bottom — active until here
+const EXIT_END = 0.2; // 20% from top — fully gone
 const MAX_TILT = 7;
 const MIN_SCALE = 0.5;
 
@@ -90,6 +90,7 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
     if (element) {
       const existing = entries.get(id);
       if (existing?.element === element) return;
+      element.style.willChange = 'transform, opacity';
       entries.set(id, {
         element,
         centerY: documentCenterY(element),
@@ -99,6 +100,8 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         tiltMul: existing?.tiltMul ?? 0.7 + seeded(hashSeed(`${id}:tilt`))() * 0.6,
       });
     } else {
+      const existing = entries.get(id);
+      if (existing) existing.element.style.willChange = '';
       entries.delete(id);
     }
   }, []);
@@ -127,21 +130,29 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         let scale = 1;
         let rotate = 0;
         let opacity = 1;
-        if (p < FULL_TOP) {
-          const u = Math.min((FULL_TOP - p) / FULL_TOP, 1);
-          scale = 1 - (1 - MIN_SCALE) * u;
-          const tiltT = Math.min((FULL_TOP - p) / TILT_RATIO, 1);
-          rotate = -MAX_TILT * entry.tiltMul * tiltT;
-        } else if (p > FULL_BOTTOM) {
-          const u = Math.min((p - FULL_BOTTOM) / (GROWTH_START - FULL_BOTTOM), 1);
-          scale = 1 - (1 - MIN_SCALE) * u;
-          const tiltT = Math.min((p - FULL_BOTTOM) / TILT_RATIO, 1);
-          rotate = MAX_TILT * entry.tiltMul * tiltT;
-          if (p > GROWTH_START) {
-            opacity = 0;
-          } else if (p > FADE_END) {
-            opacity = (GROWTH_START - p) / (GROWTH_START - FADE_END);
-          }
+        if (p < EXIT_END) {
+          // Above 20% from the top: gone
+          scale = MIN_SCALE;
+          rotate = -MAX_TILT * entry.tiltMul;
+          opacity = 0;
+        } else if (p < ACTIVE_TOP) {
+          // Outing: 75% → 20% — fade, rotate, scale down
+          const t = (ACTIVE_TOP - p) / (ACTIVE_TOP - EXIT_END);
+          scale = 1 - (1 - MIN_SCALE) * t;
+          rotate = -MAX_TILT * entry.tiltMul * t;
+          opacity = 1 - t;
+        } else if (p > HIDDEN_BELOW) {
+          // Below 10% from the bottom: not yet in
+          scale = MIN_SCALE;
+          rotate = MAX_TILT * entry.tiltMul;
+          opacity = 0;
+        } else if (p > ACTIVE_BOTTOM) {
+          // Entrance: 10% → 30% from bottom — fade in across the first 5%,
+          // grow to full scale by 30% from bottom
+          const grow = (p - ACTIVE_BOTTOM) / (HIDDEN_BELOW - ACTIVE_BOTTOM);
+          scale = 1 - (1 - MIN_SCALE) * grow;
+          rotate = MAX_TILT * entry.tiltMul * grow;
+          opacity = Math.min((HIDDEN_BELOW - p) / (HIDDEN_BELOW - FADE_END), 1);
         }
         if (
           Math.abs(scale - entry.scale) < 0.002 &&

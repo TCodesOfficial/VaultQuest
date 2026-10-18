@@ -62,9 +62,12 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
   const heroSlides = (
     active ? (active.thumbnails.length > 0 ? active.thumbnails : [active.thumbnail]) : []
   ).filter(Boolean);
-  const { index: heroIndex, ready: heroReady } = useSlideGallery(heroSlides, {
-    target: heroRef,
-  });
+  const { index: heroIndex, ready: heroReady, resolved: heroResolved } = useSlideGallery(
+    heroSlides,
+    {
+      target: heroRef,
+    }
+  );
   const heroReadyNow = heroSlides.length > 0 && heroReady[heroIndex];
   const platforms = active?.platforms ?? [];
   const byLevel = [...platforms].sort((a, b) => b.level - a.level);
@@ -128,7 +131,7 @@ export default function GameDetailPanel({ game, onClose }: GameDetailPanelProps)
                     key={heroIndex}
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
-                      backgroundImage: `url('${heroSlides[heroIndex] ?? active.thumbnail}')`,
+                      backgroundImage: `url('${heroResolved[heroIndex] ?? heroSlides[heroIndex] ?? active.thumbnail}')`,
                     }}
                     initial={{ x: '100%' }}
                     animate={{ x: 0 }}

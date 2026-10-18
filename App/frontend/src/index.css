@@ -166,17 +166,7 @@ html.light .scene__grid::before {
 .scene__orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
   will-change: transform;
-}
-
-html:not(.light) .scene__orb {
-  mix-blend-mode: screen;
-}
-
-html.light .scene__orb {
-  mix-blend-mode: multiply;
-  opacity: 0.4;
 }
 
 .scene__orb--1 {
@@ -184,7 +174,7 @@ html.light .scene__orb {
   height: 480px;
   top: -140px;
   left: -120px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--primary-strong) 50%, transparent), transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary-strong) 55%, transparent), transparent 65%);
   animation: orbFloatA 24s ease-in-out infinite alternate;
 }
 
@@ -193,7 +183,7 @@ html.light .scene__orb {
   height: 420px;
   bottom: -160px;
   right: -100px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--secondary-strong) 30%, transparent), transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--secondary-strong) 36%, transparent), transparent 65%);
   animation: orbFloatB 30s ease-in-out infinite alternate;
 }
 
@@ -202,8 +192,12 @@ html.light .scene__orb {
   height: 360px;
   top: 38%;
   right: 22%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--tertiary) 30%, transparent), transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--tertiary) 36%, transparent), transparent 65%);
   animation: orbFloatC 27s ease-in-out infinite alternate;
+}
+
+html.light .scene__orb {
+  opacity: 0.4;
 }
 
 .scene__scan {
@@ -235,7 +229,11 @@ html.light .scene__orb {
 
 .icon-glow {
   color: var(--primary);
-  animation: iconGlow 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--primary) 60%, transparent));
+}
+
+.edge-glow--still::after {
+  animation: none;
 }
 
 .pulse-ring {
@@ -354,28 +352,28 @@ html.light .card-frame:focus-visible {
 
 @keyframes orbFloatA {
   from {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(120px, 80px, 0) scale(1.15);
+    transform: translate3d(120px, 80px, 0);
   }
 }
 
 @keyframes orbFloatB {
   from {
-    transform: translate3d(0, 0, 0) scale(1.1);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-140px, -70px, 0) scale(0.92);
+    transform: translate3d(-140px, -70px, 0);
   }
 }
 
 @keyframes orbFloatC {
   from {
-    transform: translate3d(0, 0, 0) scale(0.9);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-90px, 110px, 0) scale(1.2);
+    transform: translate3d(-90px, 110px, 0);
   }
 }
 
@@ -408,16 +406,6 @@ html.light .card-frame:focus-visible {
 @keyframes brandFlow {
   to {
     background-position: 300% 0;
-  }
-}
-
-@keyframes iconGlow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--primary) 50%, transparent));
-  }
-  50% {
-    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--primary) 90%, transparent));
   }
 }
 

@@ -19,7 +19,7 @@ export default function Navbar({ theme, user, onToggleTheme, onLogout }: NavbarP
       initial={{ opacity: 0, y: -26 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="edge-glow sticky top-0 z-20 flex items-center justify-between border-b border-outline bg-[rgba(11,15,25,0.92)] px-7 py-3.5 light:bg-[rgba(248,250,252,0.92)]"
+      className="edge-glow edge-glow--still sticky top-0 z-20 flex items-center justify-between border-b border-outline bg-[rgba(11,15,25,0.92)] px-7 py-3.5 light:bg-[rgba(248,250,252,0.92)]"
     >
       <div className="flex items-center gap-2.5">
         <Gamepad2 className="icon-glow" size={28} />

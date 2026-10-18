@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { Game } from '../services/api.ts';
 import { PLATFORM_PILL } from './platformTheme.ts';
@@ -52,18 +52,22 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     Boolean
   );
   const rootRef = useRef<HTMLButtonElement>(null);
+  const [near, setNear] = useState(false);
 
   useEffect(() => {
     const element = rootRef.current;
-    if (!element || typeof IntersectionObserver === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!element || typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return;
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           element.dataset.sheen = entry.isIntersecting ? 'on' : 'off';
+          if (entry.isIntersecting) setNear(true);
         }
       },
-      { rootMargin: '80px' }
+      { rootMargin: '400px 0px' }
     );
     observer.observe(element);
     return () => observer.disconnect();
@@ -71,14 +75,15 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
 
   let phase = 0;
   for (const ch of game.id) phase = (phase * 31 + ch.charCodeAt(0)) % 2400;
-  const { index: slideIndex, ready } = useSlideGallery(slides, {
+  const { index: slideIndex, ready, resolved } = useSlideGallery(slides, {
     phaseMs: phase,
     target: rootRef,
+    enabled: near,
   });
   const hasAnyThumbnail = slides.length > 0;
   const slideReady = hasAnyThumbnail && ready[slideIndex];
   const artStyle: CSSProperties = {
-    backgroundImage: `url('${slides[slideIndex] ?? ''}')`,
+    backgroundImage: `url('${resolved[slideIndex] ?? slides[slideIndex] ?? ''}')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   };

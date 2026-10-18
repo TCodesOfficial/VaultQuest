@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import { whenImageReady } from '../lib/imageCache.ts';
+import { whenImageUrlReady } from '../lib/imageCache.ts';
 
 export interface SlideGallery {
   index: number;
   ready: boolean[];
+  resolved: string[];
 }
 
 interface SlideGalleryOptions {
   intervalMs?: number;
   phaseMs?: number;
   target?: RefObject<HTMLElement | null>;
+  enabled?: boolean;
 }
 
 let pageScrolling = false;
@@ -30,20 +32,30 @@ if (typeof window !== 'undefined') {
 }
 
 export function useSlideGallery(slides: string[], options: SlideGalleryOptions = {}): SlideGallery {
-  const { intervalMs = 2500, phaseMs = 0, target } = options;
+  const { intervalMs = 2500, phaseMs = 0, target, enabled = true } = options;
   const [index, setIndex] = useState(0);
   const [ready, setReady] = useState<boolean[]>(() => slides.map(() => false));
+  const [resolved, setResolved] = useState<string[]>(() => [...slides]);
   const readyRef = useRef(ready);
   readyRef.current = ready;
   const key = slides.join('|');
 
   useEffect(() => {
+    if (!enabled) return;
     setIndex(0);
     setReady(slides.map(() => false));
+    setResolved([...slides]);
     let cancelled = false;
     slides.forEach((url, position) => {
-      whenImageReady(url).then((ok) => {
+      whenImageUrlReady(url).then((finalUrl) => {
         if (cancelled) return;
+        const ok = finalUrl.length > 0;
+        setResolved((previous) => {
+          if (previous[position] === finalUrl) return previous;
+          const next = [...previous];
+          next[position] = finalUrl;
+          return next;
+        });
         setReady((previous) => {
           if (previous[position] === ok) return previous;
           const next = [...previous];
@@ -56,10 +68,10 @@ export function useSlideGallery(slides: string[], options: SlideGalleryOptions =
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, enabled]);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (!enabled || slides.length <= 1) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const element = target?.current;
@@ -97,7 +109,7 @@ export function useSlideGallery(slides: string[], options: SlideGalleryOptions =
       window.clearInterval(interval);
       observer?.disconnect();
     };
-  }, [slides.length, intervalMs, phaseMs, target]);
+  }, [enabled, slides.length, intervalMs, phaseMs, target]);
 
-  return { index, ready };
+  return { index, ready, resolved };
 }
