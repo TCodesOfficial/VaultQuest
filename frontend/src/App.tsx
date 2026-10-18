@@ -126,7 +126,7 @@ export default function App() {
           theme={theme}
           onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
         />
-        <main className="mx-auto w-full max-w-[1320px] flex-1 px-6 pt-5 pb-14">
+        <main className="mx-auto w-full max-w-[1320px] flex-1 px-6 pt-5 pb-28">
           <section className="mb-6 text-center">
             <motion.div initial="hidden" animate="show" variants={heroContainer}>
               <motion.span
