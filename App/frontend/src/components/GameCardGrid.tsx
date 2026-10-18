@@ -8,9 +8,10 @@ const HIDDEN_BELOW = 0.9; // 10% from bottom — entrance line
 const FADE_END = 0.85; // 15% from bottom — fully visible
 const ACTIVE_BOTTOM = 0.7; // 30% from bottom — full scale begins
 const ACTIVE_TOP = 0.25; // 75% from bottom — active until here
-const EXIT_END = 0.2; // 20% from top — fully gone
+const EXIT_END = 0.2; // 20% from top — fully out
 const MAX_TILT = 7;
 const MIN_SCALE = 0.5;
+const MIN_OPACITY = 0.5; // cards never fade below 50%
 
 interface Entry {
   element: HTMLDivElement;
@@ -131,28 +132,30 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         let rotate = 0;
         let opacity = 1;
         if (p < EXIT_END) {
-          // Above 20% from the top: gone
+          // Above 20% from the top: dimmed to the floor
           scale = MIN_SCALE;
           rotate = -MAX_TILT * entry.tiltMul;
-          opacity = 0;
+          opacity = MIN_OPACITY;
         } else if (p < ACTIVE_TOP) {
-          // Outing: 75% → 20% — fade, rotate, scale down
+          // Outing: 75% → 20% — fade to floor, rotate, scale down
           const t = (ACTIVE_TOP - p) / (ACTIVE_TOP - EXIT_END);
           scale = 1 - (1 - MIN_SCALE) * t;
           rotate = -MAX_TILT * entry.tiltMul * t;
-          opacity = 1 - t;
+          opacity = 1 - (1 - MIN_OPACITY) * t;
         } else if (p > HIDDEN_BELOW) {
-          // Below 10% from the bottom: not yet in
+          // Below 10% from the bottom: not yet in — dimmed to the floor
           scale = MIN_SCALE;
           rotate = MAX_TILT * entry.tiltMul;
-          opacity = 0;
+          opacity = MIN_OPACITY;
         } else if (p > ACTIVE_BOTTOM) {
-          // Entrance: 10% → 30% from bottom — fade in across the first 5%,
-          // grow to full scale by 30% from bottom
+          // Entrance: 10% → 30% from bottom — fade from the floor across the
+          // first 5%, grow to full scale by 30% from bottom
           const grow = (p - ACTIVE_BOTTOM) / (HIDDEN_BELOW - ACTIVE_BOTTOM);
           scale = 1 - (1 - MIN_SCALE) * grow;
           rotate = MAX_TILT * entry.tiltMul * grow;
-          opacity = Math.min((HIDDEN_BELOW - p) / (HIDDEN_BELOW - FADE_END), 1);
+          opacity =
+            MIN_OPACITY +
+            (1 - MIN_OPACITY) * Math.min((HIDDEN_BELOW - p) / (HIDDEN_BELOW - FADE_END), 1);
         }
         if (
           Math.abs(scale - entry.scale) < 0.002 &&

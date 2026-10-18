@@ -306,7 +306,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+                className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="text-left">
                   <h2 className="text-3xl font-extrabold tracking-tight text-on-surface sm:text-4xl">
