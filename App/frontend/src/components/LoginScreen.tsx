@@ -1,12 +1,21 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Gamepad2, Loader2, Lock, Mail } from 'lucide-react';
+import { Gamepad2, Loader2, Lock, Mail, User } from 'lucide-react';
 
 interface LoginScreenProps {
-  onLogin: (email: string, password: string) => Promise<void>;
+  onLogin: (
+    mode: 'signin' | 'signup',
+    email: string,
+    password: string,
+    name?: string
+  ) => Promise<void>;
 }
 
+type Mode = 'signin' | 'signup';
+
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
+  const [mode, setMode] = useState<Mode>('signin');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('player@vaultquest.dev');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -18,11 +27,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setError(null);
     setBusy(true);
     try {
-      await onLogin(email, password);
+      await onLogin(mode, email, password, name.trim() || undefined);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
       setBusy(false);
     }
+  };
+
+  const switchMode = (next: Mode) => {
+    if (busy) return;
+    setMode(next);
+    setError(null);
   };
 
   return (
@@ -41,11 +56,28 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             Vault<span className="text-flow">Quest</span>
           </h1>
           <p className="mt-2 text-sm text-on-surface-secondary">
-            Sign in to open your gaming identity vault.
+            {mode === 'signin'
+              ? 'Sign in to open your gaming identity vault.'
+              : 'Create your vault and start tracking everything you play.'}
           </p>
         </div>
 
         <form onSubmit={submit} className="mt-8 flex flex-col gap-4">
+          {mode === 'signup' && (
+            <label className="group flex items-center gap-3 rounded-xl border border-outline bg-surface-glass px-4 py-3 transition-colors duration-200 focus-within:border-primary/60">
+              <User size={16} className="shrink-0 text-on-surface-muted transition-colors duration-200 group-focus-within:text-primary" />
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Player name"
+                aria-label="Player name"
+                required
+                className="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-muted focus:outline-none"
+              />
+            </label>
+          )}
+
           <label className="group flex items-center gap-3 rounded-xl border border-outline bg-surface-glass px-4 py-3 transition-colors duration-200 focus-within:border-primary/60">
             <Mail size={16} className="shrink-0 text-on-surface-muted transition-colors duration-200 group-focus-within:text-primary" />
             <input
@@ -85,12 +117,31 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-highlight px-5 py-3 text-sm font-bold text-white shadow-[0_6px_24px_rgba(34,211,238,0.35)] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70"
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Lock size={15} strokeWidth={3} />}
-            {busy ? 'Opening your vault…' : 'Enter Vault'}
+            {busy
+              ? mode === 'signin'
+                ? 'Opening your vault…'
+                : 'Forging your vault…'
+              : mode === 'signin'
+                ? 'Enter Vault'
+                : 'Create My Vault'}
           </button>
         </form>
 
-        <p className="mt-5 text-center text-[0.68rem] font-semibold tracking-wide text-on-surface-muted uppercase">
-          Demo build — first-time emails auto-create your vault (8+ char password)
+        <p className="mt-5 text-center text-xs text-on-surface-secondary">
+          {mode === 'signin' ? 'New player?' : 'Already vaulted?'}{' '}
+          <button
+            type="button"
+            onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')}
+            className="font-bold text-highlight transition-colors duration-200 hover:text-primary"
+          >
+            {mode === 'signin' ? 'Create an account' : 'Sign in'}
+          </button>
+        </p>
+
+        <p className="mt-3 text-center text-[0.68rem] font-semibold tracking-wide text-on-surface-muted uppercase">
+          {mode === 'signin'
+            ? 'Demo build — create your vault with any email'
+            : 'Password must be at least 8 characters'}
         </p>
       </motion.div>
     </div>

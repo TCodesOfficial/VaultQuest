@@ -43,23 +43,23 @@ function toSessionUser(user: BetterAuthUser): SessionUser {
   return { id: user.id, email: user.email, name: user.name, avatar: user.image ?? null };
 }
 
-export async function login(email: string, password: string): Promise<SessionUser> {
-  const signIn = await authClient.signIn.email({ email, password });
-  if (!signIn.error) {
-    return toSessionUser(signIn.data.user);
+export async function signIn(email: string, password: string): Promise<SessionUser> {
+  const { data, error } = await authClient.signIn.email({ email, password });
+  if (error) {
+    throw new Error(error.message ?? 'Could not sign you in');
   }
-  if (signIn.error.status === 401) {
-    const name = email.split('@')[0] || 'Player';
-    const signUp = await authClient.signUp.email({ name, email, password });
-    if (!signUp.error) {
-      return toSessionUser(signUp.data.user);
+  return toSessionUser(data.user);
+}
+
+export async function signUp(name: string, email: string, password: string): Promise<SessionUser> {
+  const { data, error } = await authClient.signUp.email({ name, email, password });
+  if (error) {
+    if (/exist/i.test(error.message ?? '')) {
+      throw new Error('That email is already registered — sign in instead.');
     }
-    if (/exist/i.test(signUp.error.message ?? '')) {
-      throw new Error('That email is registered — check your password.');
-    }
-    throw new Error(signUp.error.message ?? 'Could not create your account');
+    throw new Error(error.message ?? 'Could not create your account');
   }
-  throw new Error(signIn.error.message ?? 'Could not sign you in');
+  return toSessionUser(data.user);
 }
 
 export async function fetchSession(): Promise<SessionUser | null> {

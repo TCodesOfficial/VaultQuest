@@ -10,7 +10,7 @@ import PopularGamesModal from './components/PopularGamesModal.tsx';
 import LoginScreen from './components/LoginScreen.tsx';
 import OnboardingModal from './components/OnboardingModal.tsx';
 import GuidedTour from './components/GuidedTour.tsx';
-import { fetchGames, fetchSession, login as apiLogin, logout as apiLogout } from './services/api.ts';
+import { fetchGames, fetchSession, signIn, signUp, logout as apiLogout } from './services/api.ts';
 import type { Game, SessionUser } from './services/api.ts';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
@@ -101,8 +101,11 @@ export default function App() {
   }, [authStatus, loadGames]);
 
   const handleLogin = useCallback(
-    async (email: string, password: string) => {
-      const user = await apiLogin(email, password);
+    async (mode: 'signin' | 'signup', email: string, password: string, name?: string) => {
+      const user =
+        mode === 'signup'
+          ? await signUp((name ?? email.split('@')[0]) || 'Player', email, password)
+          : await signIn(email, password);
       setSession(user);
       setAuthStatus('authenticated');
       setStatus('loading');
