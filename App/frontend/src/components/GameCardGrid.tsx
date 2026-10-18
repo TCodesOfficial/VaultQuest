@@ -58,7 +58,7 @@ function ScrollCard({ game, onOpenGame, register }: ScrollCardProps) {
           opacity: 0,
           x: (rand() * 2 - 1) * 16,
           y: 26 + rand() * 26,
-          scale: 0.94 + rand() * 0.04,
+          scale: 0.85 + rand() * 0.05,
         },
         animate: { opacity: 1, x: 0, y: 0, scale: 1 },
         transition: {
