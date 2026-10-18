@@ -1,14 +1,18 @@
 import { motion } from 'framer-motion';
-import { Gamepad2, Moon, Sun } from 'lucide-react';
+import { Gamepad2, LogOut, Moon, Sun } from 'lucide-react';
 import type { Theme } from '../App.tsx';
+import type { SessionUser } from '../services/api.ts';
 
 interface NavbarProps {
   theme: Theme;
+  user: SessionUser | null;
   onToggleTheme: () => void;
+  onLogout: () => void;
 }
 
-export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
+export default function Navbar({ theme, user, onToggleTheme, onLogout }: NavbarProps) {
   const isDark = theme === 'dark';
+  const initial = (user?.name ?? 'V').slice(0, 1).toUpperCase();
 
   return (
     <motion.header
@@ -33,11 +37,23 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
           {isDark ? <Moon size={16} /> : <Sun size={16} />}
         </button>
 
+        {user && (
+          <button
+            type="button"
+            onClick={onLogout}
+            title={`Signed in as ${user.email} — click to sign out`}
+            aria-label="Sign out"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-outline bg-surface-raised text-on-surface-muted transition-colors duration-200 hover:border-secondary/50 hover:text-secondary"
+          >
+            <LogOut size={15} />
+          </button>
+        )}
+
         <div
           className="pulse-ring grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-primary to-highlight font-bold text-white"
-          title="Guest player"
+          title={user ? `Signed in as ${user.email}` : 'Guest player'}
         >
-          V
+          {initial}
         </div>
       </div>
     </motion.header>

@@ -7,10 +7,14 @@ import GameCardGrid from './components/GameCardGrid.tsx';
 import EmptyLibrary from './components/EmptyLibrary.tsx';
 import GameDetailPanel from './components/GameDetailPanel.tsx';
 import PopularGamesModal from './components/PopularGamesModal.tsx';
-import { fetchGames } from './services/api.ts';
-import type { Game } from './services/api.ts';
+import LoginScreen from './components/LoginScreen.tsx';
+import OnboardingModal from './components/OnboardingModal.tsx';
+import GuidedTour from './components/GuidedTour.tsx';
+import { fetchGames, fetchSession, getToken, login as apiLogin, logout as apiLogout } from './services/api.ts';
+import type { Game, SessionUser } from './services/api.ts';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
+type AuthStatus = 'checking' | 'anonymous' | 'authenticated';
 export type Theme = 'dark' | 'light';
 
 type SortKey = 'recent' | 'title' | 'level' | 'achievements' | 'platforms';
@@ -42,6 +46,10 @@ export default function App() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [libQuery, setLibQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('recent');
+  const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
+  const [session, setSession] = useState<SessionUser | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const [theme, setTheme] = useState<Theme>(() =>
     typeof window !== 'undefined' && localStorage.getItem('app-theme') === 'light'
       ? 'light'
@@ -52,6 +60,28 @@ export default function App() {
     document.documentElement.classList.toggle('light', theme === 'light');
     localStorage.setItem('app-theme', theme);
   }, [theme]);
+
+  const beginArrival = useCallback(() => {
+    if (localStorage.getItem('vq-onboarded') !== '1') {
+      setShowOnboarding(true);
+    } else if (localStorage.getItem('vq-tour-done') !== '1') {
+      setShowTour(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!getToken()) {
+      setAuthStatus('anonymous');
+      return;
+    }
+    fetchSession()
+      .then(({ user }) => {
+        setSession(user);
+        setAuthStatus('authenticated');
+        beginArrival();
+      })
+      .catch(() => setAuthStatus('anonymous'));
+  }, [beginArrival]);
 
   const loadGames = useCallback(async () => {
     try {
@@ -66,8 +96,43 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (authStatus !== 'authenticated') return;
     void loadGames();
-  }, [loadGames]);
+  }, [authStatus, loadGames]);
+
+  const handleLogin = useCallback(
+    async (email: string) => {
+      const { user } = await apiLogin(email);
+      setSession(user);
+      setAuthStatus('authenticated');
+      setStatus('loading');
+      beginArrival();
+    },
+    [beginArrival]
+  );
+
+  const handleLogout = useCallback(async () => {
+    await apiLogout();
+    setSession(null);
+    setGames([]);
+    setStatus('loading');
+    setAuthStatus('anonymous');
+    setShowOnboarding(false);
+    setShowTour(false);
+  }, []);
+
+  const handleOnboardingFinish = useCallback(() => {
+    localStorage.setItem('vq-onboarded', '1');
+    setShowOnboarding(false);
+    if (localStorage.getItem('vq-tour-done') !== '1') {
+      setShowTour(true);
+    }
+  }, []);
+
+  const handleTourDone = useCallback(() => {
+    localStorage.setItem('vq-tour-done', '1');
+    setShowTour(false);
+  }, []);
 
   const platformCount = new Set(games.flatMap((g) => g.platforms.map((p) => p.platform))).size;
   const achievementTotal = games.reduce(
@@ -121,11 +186,29 @@ export default function App() {
         <div className="scene__scan" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Navbar
-          theme={theme}
-          onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-        />
+      {authStatus === 'checking' && (
+        <div className="relative z-10 flex min-h-screen items-center justify-center">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, repeat: Infinity, repeatType: 'reverse' }}
+            className="text-on-surface-secondary"
+          >
+            Checking your session…
+          </motion.p>
+        </div>
+      )}
+
+      {authStatus === 'anonymous' && <LoginScreen onLogin={handleLogin} />}
+
+      {authStatus === 'authenticated' && (
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <Navbar
+            theme={theme}
+            user={session}
+            onLogout={handleLogout}
+            onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+          />
         <main className="mx-auto w-full max-w-[1320px] flex-1 px-6 pt-5 pb-28">
           <section className="mb-6 text-center">
             <motion.div initial="hidden" animate="show" variants={heroContainer}>
@@ -215,7 +298,7 @@ export default function App() {
           )}
 
           {status === 'ready' && games.length > 0 && (
-            <section>
+            <section data-tour="library">
               <motion.div
                 initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -314,7 +397,11 @@ export default function App() {
         />
 
         <GameDetailPanel game={selectedGame} onClose={() => setSelectedGame(null)} />
-      </div>
+
+        <OnboardingModal open={showOnboarding} onFinish={handleOnboardingFinish} />
+        <GuidedTour open={showTour} onDone={handleTourDone} />
+        </div>
+      )}
     </>
   );
 }

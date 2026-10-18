@@ -4,8 +4,8 @@ import GameCard from './GameCard.tsx';
 import type { Game } from '../services/api.ts';
 import { hashSeed, seeded } from '../lib/random.ts';
 
-const FULL_TOP = 0.22;
-const FULL_BOTTOM = 0.525;
+const FULL_TOP = 0.2;
+const FULL_BOTTOM = 0.55;
 const TILT_RATIO = 0.22;
 const MAX_TILT = 7;
 const MIN_SCALE = 0.5;
