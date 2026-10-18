@@ -68,8 +68,8 @@ Implements `prd.md > The Core Journey`.
   - Frontend runs on `http://localhost:5173`
   - Database runs on Neon Cloud PostgreSQL (requires `DATABASE_URL` in `.env`)
 - **Start Commands**:
-  - Backend: `npm run start:dev` (inside `backend/`)
-  - Frontend: `npm run dev` (inside `frontend/`)
+- Backend: `npm run start:dev` (inside `App/backend/`)
+- Frontend: `npm run dev` (inside `App/frontend/`)
 - **Submission Demo Flow**:
   - Run both servers locally, open `http://localhost:5173`, walk through the onboarding, view the Call of Duty cross-platform progression card, reveal the credentials vault, and demonstrate the dark/light mode toggle.
 - **Optional Deployment**:
@@ -200,57 +200,57 @@ model GameCredential {
 ## File Structure
 
 ```
-DevPost Hackaton/
-├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma        # Database models for Neon
-│   │   └── seed.ts              # Seed data for demo games
-│   ├── src/
-│   │   ├── auth/                # Better Auth & Session guard
-│   │   │   ├── auth.module.ts
-│   │   │   ├── auth.service.ts
-│   │   │   └── auth.controller.ts
-│   │   ├── games/               # Games & Progress management
-│   │   │   ├── games.module.ts
-│   │   │   ├── games.service.ts
-│   │   │   └── games.controller.ts
-│   │   ├── credentials/         # Credentials vault service
-│   │   │   ├── credentials.module.ts
-│   │   │   ├── credentials.service.ts
-│   │   │   └── credentials.controller.ts
-│   │   ├── events/              # NestJS WebSocket Gateway
-│   │   │   ├── events.module.ts
-│   │   │   └── events.gateway.ts
-│   │   ├── prisma/              # Prisma database client service
-│   │   │   ├── prisma.module.ts
-│   │   │   └── prisma.service.ts
-│   │   ├── app.module.ts        # Root NestJS module
-│   │   └── main.ts              # Server bootstrap (sets global /api/v1 prefix)
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── OnboardingModal.tsx
-│   │   │   ├── GuidedTour.tsx
-│   │   │   ├── Navbar.tsx
-│   │   │   ├── GameCard.tsx
-│   │   │   ├── GameCardGrid.tsx
-│   │   │   ├── GameDetailPanel.tsx
-│   │   │   ├── CrossPlatformAnalytics.tsx
-│   │   │   └── CredentialsVault.tsx
-│   │   ├── services/
-│   │   │   ├── api.ts           # Fetch wrapper for /api/v1
-│   │   │   └── socket.ts        # Socket.IO connection client
-│   │   ├── App.tsx
-│   │   ├── App.css              # Custom gamer styling system
-│   │   ├── index.css
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── vite.config.ts
+VaultQuest/
+├── App/
+│   ├── backend/
+│   │   ├── prisma/
+│   │   │   ├── schema.prisma        # Database models for Neon
+│   │   │   └── seed.ts              # Seed data for demo games
+│   │   ├── src/
+│   │   │   ├── auth/                # Session auth (login / session / logout)
+│   │   │   │   ├── auth.module.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   └── auth.controller.ts
+│   │   │   ├── games/               # Games & Progress management
+│   │   │   │   ├── games.module.ts
+│   │   │   │   ├── games.service.ts
+│   │   │   │   └── games.controller.ts
+│   │   │   ├── credentials/         # Credentials vault service
+│   │   │   │   ├── credentials.module.ts
+│   │   │   │   ├── credentials.service.ts
+│   │   │   │   └── credentials.controller.ts
+│   │   │   ├── events/              # NestJS WebSocket Gateway
+│   │   │   │   ├── events.module.ts
+│   │   │   │   └── events.gateway.ts
+│   │   │   ├── prisma/              # Prisma database client service
+│   │   │   │   ├── prisma.module.ts
+│   │   │   │   └── prisma.service.ts
+│   │   │   ├── app.module.ts        # Root NestJS module
+│   │   │   └── main.ts              # Server bootstrap (sets global /api/v1 prefix)
+│   │   ├── .env.example
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── frontend/
+│       ├── src/
+│       │   ├── components/
+│       │   │   ├── LoginScreen.tsx
+│       │   │   ├── OnboardingModal.tsx
+│       │   │   ├── GuidedTour.tsx
+│       │   │   ├── Navbar.tsx
+│       │   │   ├── GameCard.tsx
+│       │   │   ├── GameCardGrid.tsx
+│       │   │   ├── GameDetailPanel.tsx
+│       │   │   ├── CrossPlatformAnalytics.tsx
+│       │   │   └── CredentialsVault.tsx
+│       │   ├── services/
+│       │   │   └── api.ts           # Fetch wrapper for /api/v1 (+ auth calls)
+│       │   ├── App.tsx
+│       │   ├── index.css
+│       │   └── main.tsx
+│       ├── index.html
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── vite.config.ts
 ├── devpost/                     # Hackathon learning workspace
 └── .gitignore
 ```
