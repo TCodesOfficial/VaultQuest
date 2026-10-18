@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 import { AtSign } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { Game } from '../services/api.ts';
 import { PLATFORM_PILL } from './platformTheme.ts';
 import { useSlideGallery } from '../hooks/useSlideGallery.ts';
+import { hashSeed, seeded } from '../lib/random.ts';
 
 const PALETTES = [
   'linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%)',
@@ -51,6 +52,23 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     Boolean
   );
   const rootRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const element = rootRef.current;
+    if (!element || typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          element.dataset.sheen = entry.isIntersecting ? 'on' : 'off';
+        }
+      },
+      { rootMargin: '80px' }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   let phase = 0;
   for (const ch of game.id) phase = (phase * 31 + ch.charCodeAt(0)) % 2400;
   const { index: slideIndex, ready } = useSlideGallery(slides, {
@@ -65,24 +83,36 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
     backgroundPosition: 'center',
   };
 
+  const rand = seeded(hashSeed(`${game.id}:look`));
+  const tiltAngle = 8 + Math.round(rand() * 5);
+  const hoverScale = 1.02 + rand() * 0.04;
+  const glareOpacity = 0.28 + rand() * 0.17;
+  const barDelay = 0.25 + rand() * 0.85;
+  const barDuration = 0.8 + rand() * 0.6;
+  const cardStyle = {
+    '--sheen-dur': `${(6 + rand() * 5).toFixed(1)}s`,
+    '--sheen-delay': `-${(rand() * 9).toFixed(1)}s`,
+  } as CSSProperties;
+
   return (
     <Tilt
       className="h-full overflow-hidden rounded-3xl"
       tiltEnable
-      tiltMaxAngleX={11}
-      tiltMaxAngleY={11}
-      scale={1.03}
+      tiltMaxAngleX={tiltAngle}
+      tiltMaxAngleY={tiltAngle}
+      scale={hoverScale}
       glareEnable
-      glareMaxOpacity={0.4}
+      glareMaxOpacity={glareOpacity}
       glareColor="rgba(59,130,246,0.5)"
       glarePosition="all"
-      transitionSpeed={400}
+      transitionSpeed={340 + Math.round(rand() * 140)}
     >
       <button
         type="button"
         ref={rootRef}
         onClick={() => onOpen?.(game)}
         aria-label={`Open ${game.title}`}
+        style={cardStyle}
         className="card-frame group relative flex h-full min-h-72 w-full flex-col overflow-hidden text-left"
       >
         <div
@@ -174,7 +204,7 @@ export default function GameCard({ game, onOpen }: GameCardProps) {
                   className="h-full rounded-full bg-gradient-to-r from-primary via-highlight to-secondary shadow-[0_0_10px_rgba(34,211,238,0.55)]"
                   initial={{ width: 0 }}
                   animate={{ width: `${achievementPct}%` }}
-                  transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+                  transition={{ duration: barDuration, delay: barDelay, ease: 'easeOut' }}
                 />
               </div>
             </div>

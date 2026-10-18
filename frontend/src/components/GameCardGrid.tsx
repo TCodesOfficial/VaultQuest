@@ -1,35 +1,21 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { Variants } from 'framer-motion';
 import GameCard from './GameCard.tsx';
 import type { Game } from '../services/api.ts';
+import { hashSeed, seeded } from '../lib/random.ts';
 
-const container: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.04, delayChildren: 0.08 },
-  },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 32, scale: 0.96 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: 'spring', stiffness: 260, damping: 22 },
-  },
-};
-
-const TILT_START = 0.06;
+const FULL_TOP = 0.22;
+const FULL_BOTTOM = 0.525;
+const TILT_RATIO = 0.22;
 const MAX_TILT = 7;
-const MIN_SCALE = 0.74;
+const MIN_SCALE = 0.5;
 
 interface Entry {
   element: HTMLDivElement;
   centerY: number;
   scale: number;
   rotate: number;
+  tiltMul: number;
 }
 
 interface GameCardGridProps {
@@ -58,9 +44,33 @@ function ScrollCard({ game, onOpenGame, register }: ScrollCardProps) {
     (element: HTMLDivElement | null) => register(game.id, element),
     [register, game.id]
   );
+  const reduced = useReducedMotion();
+
+  const rand = seeded(hashSeed(`${game.id}:enter`));
+  const entrance = reduced
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.2 },
+      }
+    : {
+        initial: {
+          opacity: 0,
+          x: (rand() * 2 - 1) * 16,
+          y: 26 + rand() * 26,
+          scale: 0.94 + rand() * 0.04,
+        },
+        animate: { opacity: 1, x: 0, y: 0, scale: 1 },
+        transition: {
+          type: 'spring' as const,
+          stiffness: 200 + rand() * 140,
+          damping: 16 + rand() * 11,
+          delay: 0.05 + rand() * 0.4,
+        },
+      };
 
   return (
-    <motion.div variants={item} layout className="h-full">
+    <motion.div layout className="h-full" {...entrance}>
       <div ref={ref} className="h-full">
         <GameCard game={game} onOpen={onOpenGame} />
       </div>
@@ -82,6 +92,7 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
         centerY: documentCenterY(element),
         scale: existing?.scale ?? 1,
         rotate: existing?.rotate ?? 0,
+        tiltMul: existing?.tiltMul ?? 0.7 + seeded(hashSeed(`${id}:tilt`))() * 0.6,
       });
     } else {
       entries.delete(id);
@@ -106,15 +117,22 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
       if (!dirty) return;
       dirty = false;
       const viewportH = window.innerHeight;
-      const focusLine = window.scrollY + viewportH * (window.innerWidth < 640 ? 0.5 : 0.7);
-      const range = viewportH * 0.5;
+      const scrollY = window.scrollY;
       for (const entry of entries.values()) {
-        const dist = entry.centerY - focusLine;
-        const t = Math.min(Math.abs(dist) / range, 1);
-        const scale = 1 - (1 - MIN_SCALE) * t;
-        const tiltSpan = Math.max(range - TILT_START * viewportH, 1);
-        const tiltT = Math.min(Math.max((Math.abs(dist) - TILT_START * viewportH) / tiltSpan, 0), 1);
-        const rotate = (dist >= 0 ? MAX_TILT : -MAX_TILT) * tiltT;
+        const p = (entry.centerY - scrollY) / viewportH;
+        let scale = 1;
+        let rotate = 0;
+        if (p < FULL_TOP) {
+          const u = Math.min((FULL_TOP - p) / FULL_TOP, 1);
+          scale = 1 - (1 - MIN_SCALE) * u;
+          const tiltT = Math.min((FULL_TOP - p) / TILT_RATIO, 1);
+          rotate = -MAX_TILT * entry.tiltMul * tiltT;
+        } else if (p > FULL_BOTTOM) {
+          const u = Math.min((p - FULL_BOTTOM) / (1 - FULL_BOTTOM), 1);
+          scale = 1 - (1 - MIN_SCALE) * u;
+          const tiltT = Math.min((p - FULL_BOTTOM) / TILT_RATIO, 1);
+          rotate = MAX_TILT * entry.tiltMul * tiltT;
+        }
         if (Math.abs(scale - entry.scale) < 0.002 && Math.abs(rotate - entry.rotate) < 0.05) {
           continue;
         }
@@ -148,12 +166,7 @@ export default function GameCardGrid({ games, onOpenGame }: GameCardGridProps) {
   }, [reduced, games]);
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-    >
+    <motion.div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {games.map((game) => (
         <ScrollCard
           key={game.id}
