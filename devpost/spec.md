@@ -114,7 +114,7 @@ Implements `prd.md > Features and Behavior > 2. Game Library Dashboard`.
 - Responsive CSS grid (4–5 on desktop, 2–3 on tablet, 2 on mobile).
 - Renders cover art thumbnail, title, gamertag, current level, platform icons, and hover glow.
 
-### 5. `GameDetailModal`
+### 5. `GameDetailPanel`
 Implements `prd.md > Features and Behavior > 3. Game Detail & Cross-Platform Analytics`.
 - Displays hero banner, active platforms list, and overall player rank.
 - Houses the primary action button "Check Login Details" and the trigger for cross-platform analytics.
@@ -237,7 +237,7 @@ DevPost Hackaton/
 │   │   │   ├── Navbar.tsx
 │   │   │   ├── GameCard.tsx
 │   │   │   ├── GameCardGrid.tsx
-│   │   │   ├── GameDetailModal.tsx
+│   │   │   ├── GameDetailPanel.tsx
 │   │   │   ├── CrossPlatformAnalytics.tsx
 │   │   │   └── CredentialsVault.tsx
 │   │   ├── services/
