@@ -1,5 +1,6 @@
-export type Platform = 'PLAYSTATION' | 'XBOX' | 'PC' | 'MOBILE';
+import { authClient } from '../lib/auth-client.ts';
 
+export type Platform = 'PLAYSTATION' | 'XBOX' | 'PC' | 'MOBILE';
 export interface PlatformProgress {
   id: string;
   platform: Platform;
@@ -31,64 +32,43 @@ export interface SessionUser {
   avatar: string | null;
 }
 
-const TOKEN_KEY = 'vq-session-token';
-
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
 }
 
-export function setToken(token: string | null) {
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  } else {
-    localStorage.removeItem(TOKEN_KEY);
-  }
+function toSessionUser(user: BetterAuthUser): SessionUser {
+  return { id: user.id, email: user.email, name: user.name, avatar: user.image ?? null };
 }
 
-function authHeaders(): Record<string, string> {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+export async function login(email: string, password: string): Promise<SessionUser> {
+  const signIn = await authClient.signIn.email({ email, password });
+  if (!signIn.error) {
+    return toSessionUser(signIn.data.user);
+  }
+  if (signIn.error.status === 401) {
+    const name = email.split('@')[0] || 'Player';
+    const signUp = await authClient.signUp.email({ name, email, password });
+    if (!signUp.error) {
+      return toSessionUser(signUp.data.user);
+    }
+    if (/exist/i.test(signUp.error.message ?? '')) {
+      throw new Error('That email is registered — check your password.');
+    }
+    throw new Error(signUp.error.message ?? 'Could not create your account');
+  }
+  throw new Error(signIn.error.message ?? 'Could not sign you in');
 }
 
-export async function login(email: string): Promise<{ token: string; user: SessionUser }> {
-  const response = await fetch(`${API_BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  if (!response.ok) {
-    throw new Error(`Could not sign you in (HTTP ${response.status})`);
-  }
-  const data = await response.json();
-  setToken(data.token);
-  return data;
-}
-
-export async function fetchSession(): Promise<{ user: SessionUser }> {
-  const response = await fetch(`${API_BASE}/auth/session`, { headers: authHeaders() });
-  if (response.status === 401) {
-    setToken(null);
-    throw new UnauthorizedError();
-  }
-  if (!response.ok) {
-    throw new Error(`Session check failed (HTTP ${response.status})`);
-  }
-  return response.json();
+export async function fetchSession(): Promise<SessionUser | null> {
+  const { data } = await authClient.getSession();
+  return data?.user ? toSessionUser(data.user) : null;
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE}/auth/logout`, {
-    method: 'POST',
-    headers: authHeaders(),
-  }).catch(() => undefined);
-  setToken(null);
-}
-
-export class UnauthorizedError extends Error {
-  constructor() {
-    super('Not signed in');
-    this.name = 'UnauthorizedError';
-  }
+  await authClient.signOut().catch(() => undefined);
 }
 
 export async function fetchGames(): Promise<Game[]> {

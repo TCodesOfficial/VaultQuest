@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Gamepad2, Loader2, Lock, Mail } from 'lucide-react';
 
 interface LoginScreenProps {
-  onLogin: (email: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
@@ -18,7 +18,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setError(null);
     setBusy(true);
     try {
-      await onLogin(email);
+      await onLogin(email, password);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
       setBusy(false);
@@ -67,6 +67,8 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="••••••••"
               aria-label="Password"
+              minLength={8}
+              required
               className="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-muted focus:outline-none"
             />
           </label>
@@ -88,7 +90,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         </form>
 
         <p className="mt-5 text-center text-[0.68rem] font-semibold tracking-wide text-on-surface-muted uppercase">
-          Demo build — any email and password gets you in
+          Demo build — first-time emails auto-create your vault (8+ char password)
         </p>
       </motion.div>
     </div>

@@ -10,7 +10,7 @@ import PopularGamesModal from './components/PopularGamesModal.tsx';
 import LoginScreen from './components/LoginScreen.tsx';
 import OnboardingModal from './components/OnboardingModal.tsx';
 import GuidedTour from './components/GuidedTour.tsx';
-import { fetchGames, fetchSession, getToken, login as apiLogin, logout as apiLogout } from './services/api.ts';
+import { fetchGames, fetchSession, login as apiLogin, logout as apiLogout } from './services/api.ts';
 import type { Game, SessionUser } from './services/api.ts';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
@@ -70,15 +70,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!getToken()) {
-      setAuthStatus('anonymous');
-      return;
-    }
     fetchSession()
-      .then(({ user }) => {
-        setSession(user);
-        setAuthStatus('authenticated');
-        beginArrival();
+      .then((user) => {
+        if (user) {
+          setSession(user);
+          setAuthStatus('authenticated');
+          beginArrival();
+        } else {
+          setAuthStatus('anonymous');
+        }
       })
       .catch(() => setAuthStatus('anonymous'));
   }, [beginArrival]);
@@ -101,8 +101,8 @@ export default function App() {
   }, [authStatus, loadGames]);
 
   const handleLogin = useCallback(
-    async (email: string) => {
-      const { user } = await apiLogin(email);
+    async (email: string, password: string) => {
+      const user = await apiLogin(email, password);
       setSession(user);
       setAuthStatus('authenticated');
       setStatus('loading');
